@@ -21,7 +21,7 @@ export async function handleWebhook(
   let assessment = await getActiveAssessment(student.id);
 
   if (!student.grade) {
-    await handleGradeSelection(student.id, messageBody);
+    await handleGradeSelection(student.id, fromPhone, messageBody);
     return;
   }
 
@@ -88,6 +88,7 @@ export async function handleWebhook(
 
 async function handleGradeSelection(
   studentId: string,
+  fromPhone: string,
   gradeInput: string
 ): Promise<void> {
   const selectedGradeIdx = parseInt(gradeInput);
@@ -98,7 +99,7 @@ async function handleGradeSelection(
     selectedGradeIdx >= GRADES.length
   ) {
     await sendText(
-      (await findOrCreateStudent("")).id,
+      fromPhone,
       "Invalid selection. Please choose 0 for Grade 10, 1 for Grade 11, or 2 for Grade 12."
     );
     return;
@@ -108,7 +109,7 @@ async function handleGradeSelection(
   await updateStudent(studentId, { grade: selectedGrade });
 
   await sendText(
-    (await findOrCreateStudent("")).id,
+    fromPhone,
     `Great! Grade ${selectedGrade} selected. Let's start the RIASEC assessment!\n\n📋 Answer each question by selecting:\n0 for the first option\n1 for the second\n2 for the third`
   );
 }
