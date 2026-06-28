@@ -196,26 +196,40 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === "POST" && path.includes("webhook")) {
-      // Parse body
+      console.log("Webhook received");
+      console.log("Raw body:", req.body);
+      console.log("Body type:", typeof req.body);
+
+      // Parse body - handle both JSON and form-encoded
       let bodyData = req.body;
       if (typeof bodyData === "string") {
-        const params = new URLSearchParams(bodyData);
-        bodyData = {
-          From: params.get("From"),
-          Body: params.get("Body"),
-        };
+        try {
+          bodyData = JSON.parse(bodyData);
+        } catch {
+          const params = new URLSearchParams(bodyData);
+          bodyData = {
+            From: params.get("From"),
+            Body: params.get("Body"),
+          };
+        }
       }
 
+      console.log("Parsed body:", bodyData);
       const { From, Body } = bodyData || {};
 
       if (!From || !Body) {
+        console.log("Missing From or Body");
         res.setHeader("Content-Type", "application/json");
         res.status(400).end(JSON.stringify({ error: "Missing From or Body", received: bodyData }));
         return;
       }
 
+      console.log("Processing webhook for", From, "with message:", Body);
+
       // Process asynchronously
-      handleWebhook(From, Body).catch(console.error);
+      handleWebhook(From, Body).catch(err => {
+        console.error("Webhook error:", err);
+      });
 
       // Respond immediately
       res.setHeader("Content-Type", "application/json");
