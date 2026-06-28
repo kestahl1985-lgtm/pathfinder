@@ -35,6 +35,79 @@ const QUESTIONS = [
   "Would you like to lead or manage a team?",
 ];
 
+// Each question maps to a Holland (RIASEC) trait, index-aligned to QUESTIONS.
+const TRAITS = ["R", "I", "A", "S", "E"];
+
+const TRAIT_NAMES = {
+  R: "Hands-on & practical",
+  I: "Curious & analytical",
+  A: "Creative & expressive",
+  S: "Caring & people-focused",
+  E: "Driven & enterprising",
+};
+
+const CAREERS = {
+  R: {
+    careers: ["Engineering", "Electrician & skilled trades", "Agriculture", "Architecture"],
+    subjects: "Mathematics + Physical Sciences",
+  },
+  I: {
+    careers: ["Medicine & health sciences", "Data science & IT", "Scientific research", "Engineering"],
+    subjects: "Mathematics, Physical Sciences & Life Sciences",
+  },
+  A: {
+    careers: ["Graphic & UX design", "Architecture", "Media, film & content", "Music & performing arts"],
+    subjects: "Visual Arts/Design + strong languages (Maths helps for architecture)",
+  },
+  S: {
+    careers: ["Teaching", "Nursing", "Social work", "Psychology"],
+    subjects: "Life Sciences & Languages (Maths for many health courses)",
+  },
+  E: {
+    careers: ["Entrepreneurship & business", "Law", "Marketing & sales", "Management"],
+    subjects: "Mathematics, Business Studies & Accounting",
+  },
+};
+
+function gradeTip(grade) {
+  if (grade === 10) return "You're in Grade 10 — perfect timing to lock in the right subjects. 🎯";
+  if (grade === 11) return "You're in Grade 11 — there's still time to adjust your subjects if needed. ⏳";
+  return "You're in Grade 12 — focus on the marks these courses need, and start your applications. 📨";
+}
+
+// Turns the 5 answers into a personalised career result (array of text pieces).
+function buildResults(s) {
+  const scores = {};
+  TRAITS.forEach((t, i) => { scores[t] = s.responses[i] || 0; });
+  const ranked = TRAITS.slice().sort((a, b) => scores[b] - scores[a]);
+  const top = ranked[0];
+  const second = ranked[1];
+
+  const topCareers = CAREERS[top].careers;
+  const blend = scores[second] > 0 ? ` with a touch of *${TRAIT_NAMES[second]}*` : "";
+
+  const result =
+    `🧭 *Your Pathfinder result, ${s.data.name}*\n\n` +
+    `Your strongest direction is *${TRAIT_NAMES[top]}*${blend}.\n\n` +
+    `💼 *Careers where you'd thrive:*\n` +
+    topCareers.map((c) => `• ${c}`).join("\n") +
+    `\n\n📚 *Subjects to focus on:*\n${CAREERS[top].subjects}`;
+
+  const next =
+    `✅ *Your next steps:*\n` +
+    `• Keep or choose the subjects above\n` +
+    `• Chat to your Life Orientation teacher about these careers\n` +
+    `• Watch for bursaries in these fields\n\n` +
+    `${gradeTip(s.data.grade)}\n\n` +
+    `We'll also share matching colleges & bursaries with you. 🎓\n\n` +
+    `_Reply RESTART to explore a different result._`;
+
+  return [
+    { type: "text", text: result },
+    { type: "text", text: next },
+  ];
+}
+
 function freshSession(phone) {
   return { phone, step: "name", data: {}, q: 0, responses: [] };
 }
@@ -113,18 +186,14 @@ function advance(s, input, rawBody) {
     }
 
     s.step = "done";
-    const avg = (s.responses.reduce((a, b) => a + b, 0) / s.responses.length).toFixed(1);
     return [
       {
         type: "text",
         text:
           `🎉 You did it, ${s.data.name}!\n\n` +
-          "That's a real step most learners never take — you've started shaping your future on purpose. 🌟\n\n" +
-          "We're now matching your strengths to careers, the subjects you'll need, and colleges and bursaries that fit *you*. " +
-          "You'll get your personalised path shortly.\n\n" +
-          "Remember: the earlier you know your direction, the more choices you keep open. You're ahead of the game. 🚀\n\n" +
-          "_Reply RESTART anytime to take it again._",
+          "That's a step most learners never take. Here's what your answers reveal about you 👇",
       },
+      ...buildResults(s),
     ];
   }
 
