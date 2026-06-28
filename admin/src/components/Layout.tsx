@@ -1,6 +1,6 @@
 import { useAuth } from "../lib/auth";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Users, Target, LogOut, Menu, X } from "lucide-react";
+import { BarChart3, Users, Target, LogOut, Menu, X, Cpu } from "lucide-react";
 import { useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -14,6 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: "/", label: "Dashboard", icon: BarChart3 },
     { path: "/students", label: "Students", icon: Users },
     { path: "/leads", label: "Qualified Leads", icon: Target },
+    { path: "/backend", label: "Backend Control", icon: Cpu },
   ];
 
   return (
