@@ -1,4 +1,4 @@
-export default function handler(req: any, res: any) {
+module.exports = (req, res) => {
   const path = req.url || "/";
 
   if (req.method === "GET" && path.includes("health")) {
@@ -23,4 +23,4 @@ export default function handler(req: any, res: any) {
   } else {
     res.status(404).json({ error: "Not found" });
   }
-}
+};
