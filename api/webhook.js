@@ -1,27 +1,31 @@
 // Pathfinder WhatsApp webhook.
 //
-// Multiple-choice steps (grade + the 5 questions) are sent as tappable
-// WhatsApp quick-reply BUTTONS via Twilio's Content API. If Twilio
-// credentials are not configured (or an API send fails), the webhook
-// automatically falls back to a plain-text TwiML reply so it ALWAYS responds.
-//
-// State is in-memory (persists while a lambda stays warm) — moved to
-// Supabase next for full reliability.
+// • Multiple-choice steps (grade + the 5 questions) send tappable WhatsApp
+//   quick-reply BUTTONS via Twilio's Content API.
+// • Conversation state is PERSISTED in Supabase (table: whatsapp_sessions),
+//   so a learner can pause and resume later and the flow never resets.
+// • Everything degrades gracefully: if Supabase isn't configured it falls
+//   back to in-memory state; if Twilio creds are missing it falls back to a
+//   plain-text TwiML reply. The bot always responds.
 
 const https = require("https");
 
-// --- Twilio config (creds from env; Content SIDs created via Content API) ---
+// --- Twilio config ---
 const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const SID_YESNO = process.env.CONTENT_SID_YESNO || "HX94ea41518e35dd7bd5c666b8b2f968d6";
 const SID_GRADE = process.env.CONTENT_SID_GRADE || "HX8c9397cd6d8cc5c9cac8c478e51768ab";
 
-function hasCreds() {
-  return Boolean(ACCOUNT_SID && AUTH_TOKEN && PHONE_NUMBER);
-}
+// --- Supabase config ---
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const sessions = {};
+const hasTwilio = () => Boolean(ACCOUNT_SID && AUTH_TOKEN && PHONE_NUMBER);
+const hasSupabase = () => Boolean(SUPABASE_URL && SUPABASE_KEY);
+
+// In-memory fallback store (used only when Supabase is not configured)
+const memory = {};
 
 const QUESTIONS = [
   "Do you prefer building or fixing things with your hands?",
@@ -31,36 +35,18 @@ const QUESTIONS = [
   "Would you like to lead or manage a team?",
 ];
 
-// ---------- Reply builders ----------
-// Each reply piece is one of:
-//   { type: "text",  text }
-//   { type: "yesno", text }   -> No / Maybe / Yes buttons
-//   { type: "grade", text }   -> Grade 10 / 11 / 12 buttons
+function freshSession(phone) {
+  return { phone, step: "name", data: {}, q: 0, responses: [] };
+}
 
 function questionText(index) {
   return `Question ${index + 1} of ${QUESTIONS.length}\n\n${QUESTIONS[index]}`;
 }
 
-// ---------- State machine ----------
-// Returns an array of reply pieces.
-function getReplies(from, input, rawBody) {
-  let s = sessions[from];
-
-  if (!s) {
-    sessions[from] = { step: "name", data: {}, q: 0, responses: [] };
-    return [
-      {
-        type: "text",
-        text:
-          "👋 Welcome to *Pathfinder* — your free career guide on WhatsApp!\n\n" +
-          "Choosing a career can feel overwhelming. Most learners only start thinking about it in matric — but the subjects you pick in Grade 9, 10 and 11 already shape the doors that stay open to you. 🚪\n\n" +
-          "Pathfinder helps you discover *what you're naturally good at*, the careers that fit you, and the exact subjects and marks you'll need to get there — before it's too late to change course.\n\n" +
-          "It takes about 5 minutes, it's completely free, and the path is yours to keep. 🌱\n\n" +
-          "Let's begin! What's your *first name*?",
-      },
-    ];
-  }
-
+// ===================== State machine =====================
+// Advances an EXISTING session in place. Returns an array of reply pieces:
+//   { type: "text" | "yesno" | "grade", text }
+function advance(s, input, rawBody) {
   if (s.step === "name") {
     s.data.name = rawBody;
     s.step = "school";
@@ -149,7 +135,87 @@ function getReplies(from, input, rawBody) {
   return [{ type: "text", text: "Sorry, something went wrong. Reply RESTART to begin again." }];
 }
 
-// ---------- Senders ----------
+function welcomePiece() {
+  return {
+    type: "text",
+    text:
+      "👋 Welcome to *Pathfinder* — your free career guide on WhatsApp!\n\n" +
+      "Choosing a career can feel overwhelming. Most learners only start thinking about it in matric — but the subjects you pick in Grade 9, 10 and 11 already shape the doors that stay open to you. 🚪\n\n" +
+      "Pathfinder helps you discover *what you're naturally good at*, the careers that fit you, and the exact subjects and marks you'll need to get there — before it's too late to change course.\n\n" +
+      "It takes about 5 minutes, you can pause and pick up anytime, and it's completely free. 🌱\n\n" +
+      "Let's begin! What's your *first name*?",
+  };
+}
+
+// ===================== Supabase persistence (REST) =====================
+function supabaseRequest(method, path, body) {
+  return new Promise((resolve) => {
+    const url = new URL(SUPABASE_URL);
+    const payload = body ? JSON.stringify(body) : null;
+    const headers = {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+    };
+    if (method === "POST") headers["Prefer"] = "resolution=merge-duplicates,return=minimal";
+    if (payload) headers["Content-Length"] = Buffer.byteLength(payload);
+
+    const req = https.request(
+      { hostname: url.hostname, path: `/rest/v1/${path}`, method, headers },
+      (res) => {
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => {
+          try {
+            resolve({ ok: res.statusCode < 300, status: res.statusCode, json: data ? JSON.parse(data) : null });
+          } catch {
+            resolve({ ok: res.statusCode < 300, status: res.statusCode, json: null });
+          }
+        });
+      }
+    );
+    req.on("error", (e) => resolve({ ok: false, error: e.message }));
+    if (payload) req.write(payload);
+    req.end();
+  });
+}
+
+async function loadSession(phone) {
+  if (!hasSupabase()) return memory[phone] || null;
+  const enc = encodeURIComponent(phone);
+  const r = await supabaseRequest("GET", `whatsapp_sessions?phone=eq.${enc}&limit=1`);
+  if (r.ok && Array.isArray(r.json) && r.json.length) {
+    const row = r.json[0];
+    return { phone, step: row.step, data: row.data || {}, q: row.q || 0, responses: row.responses || [] };
+  }
+  return null;
+}
+
+async function saveSession(s) {
+  if (!hasSupabase()) {
+    memory[s.phone] = s;
+    return;
+  }
+  await supabaseRequest("POST", "whatsapp_sessions", {
+    phone: s.phone,
+    step: s.step,
+    data: s.data,
+    q: s.q,
+    responses: s.responses,
+    updated_at: new Date().toISOString(),
+  });
+}
+
+async function deleteSession(phone) {
+  if (!hasSupabase()) {
+    delete memory[phone];
+    return;
+  }
+  const enc = encodeURIComponent(phone);
+  await supabaseRequest("DELETE", `whatsapp_sessions?phone=eq.${enc}`);
+}
+
+// ===================== Twilio senders =====================
 function twilioPost(params) {
   return new Promise((resolve) => {
     const body = new URLSearchParams(params).toString();
@@ -177,18 +243,14 @@ function twilioPost(params) {
   });
 }
 
-async function sendPiece(to, piece) {
+function sendPiece(to, piece) {
   const base = { From: `whatsapp:${PHONE_NUMBER}`, To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}` };
-  if (piece.type === "yesno") {
-    return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
-  }
-  if (piece.type === "grade") {
-    return twilioPost({ ...base, ContentSid: SID_GRADE, ContentVariables: JSON.stringify({ 1: piece.text }) });
-  }
+  if (piece.type === "yesno") return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
+  if (piece.type === "grade") return twilioPost({ ...base, ContentSid: SID_GRADE, ContentVariables: JSON.stringify({ 1: piece.text }) });
   return twilioPost({ ...base, Body: piece.text });
 }
 
-// Plain-text rendering for the TwiML fallback (no buttons available).
+// ===================== Fallback rendering =====================
 function renderFallback(pieces) {
   return pieces
     .map((p) => {
@@ -208,35 +270,39 @@ function escapeXml(t) {
     .replace(/'/g, "&apos;");
 }
 
-function twimlResponse(message) {
-  return `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(message)}</Message></Response>`;
-}
+const twimlResponse = (m) => `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(m)}</Message></Response>`;
+const emptyTwiml = () => `<?xml version="1.0" encoding="UTF-8"?><Response></Response>`;
 
-function emptyTwiml() {
-  return `<?xml version="1.0" encoding="UTF-8"?><Response></Response>`;
-}
-
+// ===================== Handler =====================
 module.exports = async (req, res) => {
   const body = req.body || {};
   const from = body.From || "";
   const rawBody = (body.Body || "").trim();
-  // Button taps arrive as ButtonPayload (the id we set: "0".."2", "10".."12")
   const buttonPayload = (body.ButtonPayload || "").trim();
   const input = buttonPayload || rawBody;
 
-  // Hard reset
+  let pieces;
+
   if (rawBody.toUpperCase() === "RESTART") {
-    delete sessions[from];
+    await deleteSession(from);
   }
 
-  const pieces = getReplies(from, input, rawBody);
+  let session = await loadSession(from);
 
-  // Preferred path: real buttons via Twilio API, then ack Twilio with empty TwiML.
-  if (hasCreds()) {
+  if (!session) {
+    // Brand-new (or just reset) conversation
+    session = freshSession(from);
+    pieces = [welcomePiece()];
+  } else {
+    pieces = advance(session, input, rawBody);
+  }
+
+  await saveSession(session);
+
+  // Preferred: real buttons via Twilio API, then ack with empty TwiML
+  if (hasTwilio()) {
     try {
-      for (const piece of pieces) {
-        await sendPiece(from, piece);
-      }
+      for (const piece of pieces) await sendPiece(from, piece);
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/xml");
       res.end(emptyTwiml());
@@ -246,7 +312,7 @@ module.exports = async (req, res) => {
     }
   }
 
-  // Fallback: plain-text TwiML (always works, no buttons).
+  // Fallback: plain-text TwiML (always works)
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/xml");
   res.end(twimlResponse(renderFallback(pieces)));
