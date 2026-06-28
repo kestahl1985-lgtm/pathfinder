@@ -196,11 +196,21 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === "POST" && path.includes("webhook")) {
-      const { From, Body } = req.body || {};
+      // Parse body
+      let bodyData = req.body;
+      if (typeof bodyData === "string") {
+        const params = new URLSearchParams(bodyData);
+        bodyData = {
+          From: params.get("From"),
+          Body: params.get("Body"),
+        };
+      }
+
+      const { From, Body } = bodyData || {};
 
       if (!From || !Body) {
         res.setHeader("Content-Type", "application/json");
-        res.status(400).end(JSON.stringify({ error: "Missing From or Body" }));
+        res.status(400).end(JSON.stringify({ error: "Missing From or Body", received: bodyData }));
         return;
       }
 
