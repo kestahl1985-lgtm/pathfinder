@@ -259,3 +259,5 @@ module.exports = async (req, res) => {
     res.status(500).end(JSON.stringify({ error: "Server error" }));
   }
 };
+
+module.exports = handler;
