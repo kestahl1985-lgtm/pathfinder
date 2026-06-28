@@ -1,33 +1,42 @@
-export default (req, res) => {
+module.exports = (req, res) => {
   const path = req.url || "/";
 
   try {
     if (req.method === "GET" && path.includes("health")) {
-      return res.status(200).json({ status: "ok", service: "pathfinder-backend" });
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).end(JSON.stringify({ status: "ok", service: "pathfinder-backend" }));
+      return;
     }
 
     if (req.method === "POST" && path.includes("webhook")) {
       const { From, Body } = req.body || {};
+      res.setHeader("Content-Type", "application/json");
       if (!From || !Body) {
-        return res.status(400).json({ error: "Missing From or Body" });
+        res.status(400).end(JSON.stringify({ error: "Missing From or Body" }));
+      } else {
+        res.status(200).end(JSON.stringify({ received: true }));
       }
-      return res.status(200).json({ received: true });
+      return;
     }
 
     if (req.method === "GET" && path.includes("stats")) {
-      return res.status(200).json({
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).end(JSON.stringify({
         total_students: 0,
         completed_assessments: 0,
         qualified_leads: 0,
         colleges_connected: 0,
         leads_contacted: 0,
         leads_enrolled: 0,
-      });
+      }));
+      return;
     }
 
-    return res.status(404).json({ error: "Not found" });
+    res.setHeader("Content-Type", "application/json");
+    res.status(404).end(JSON.stringify({ error: "Not found" }));
   } catch (error) {
     console.error("Error:", error);
-    return res.status(500).json({ error: "Server error" });
+    res.setHeader("Content-Type", "application/json");
+    res.status(500).end(JSON.stringify({ error: "Server error" }));
   }
 };

@@ -2,7 +2,6 @@
   "name": "pathfinder-backend",
   "version": "1.0.0",
   "description": "Pathfinder WhatsApp API backend",
-  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "echo 'Build complete'",
