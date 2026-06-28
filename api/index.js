@@ -2,9 +2,12 @@ const https = require("https");
 
 // Send WhatsApp message via Twilio
 async function sendWhatsAppMessage(to, message) {
+  console.log("sendWhatsAppMessage called:", { to, message: message.substring(0, 50) });
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+
+  console.log("Twilio credentials present:", !!accountSid, !!authToken, !!fromNumber);
 
   if (!accountSid || !authToken || !fromNumber) {
     console.error("Missing Twilio credentials");
@@ -70,6 +73,7 @@ const ONBOARDING_STEPS = ["name", "school", "age", "suburb", "grade"];
 
 // Handle incoming WhatsApp message
 async function handleWebhook(from, messageBody) {
+  console.log("handleWebhook called with:", { from, messageBody });
   const studentPhone = from.replace("whatsapp:", "");
   const trimmedInput = messageBody.trim();
 
