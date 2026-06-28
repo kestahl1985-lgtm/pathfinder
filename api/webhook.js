@@ -44,9 +44,11 @@ function getReply(from, body) {
   if (!s) {
     sessions[from] = { step: "name", data: {}, q: 0, responses: [] };
     return (
-      "👋 Welcome to Pathfinder!\n\n" +
-      "The free career-guidance platform for South African students.\n\n" +
-      "Let's get to know you. What's your first name?"
+      "👋 Welcome to *Pathfinder* — your free career guide on WhatsApp!\n\n" +
+      "Choosing a career can feel overwhelming. Most learners only start thinking about it in matric — but the subjects you pick in Grade 9, 10 and 11 already shape the doors that stay open to you. 🚪\n\n" +
+      "Pathfinder helps you discover *what you're naturally good at*, the careers that fit you, and the exact subjects and marks you'll need to get there — before it's too late to change course.\n\n" +
+      "It takes about 5 minutes, it's completely free, and the path is yours to keep. 🌱\n\n" +
+      "Let's begin! What's your *first name*?"
     );
   }
 
@@ -91,13 +93,14 @@ function getReply(from, body) {
     s.step = "assessment";
     s.q = 0;
     return (
-      "✅ Profile complete!\n\n" +
-      `• Name: ${s.data.name}\n` +
+      `✅ Thanks ${s.data.name}, your profile is set!\n\n` +
       `• School: ${s.data.school}\n` +
       `• Age: ${s.data.age}\n` +
       `• Area: ${s.data.suburb}\n` +
       `• Grade: ${grade}\n\n` +
-      "📋 Now your career assessment.\n\n" +
+      "📋 *Now the fun part.*\n\n" +
+      "There are no right or wrong answers here — just be honest about what feels like *you*. " +
+      "Your answers reveal your natural strengths and the careers where you'll thrive. 💡\n\n" +
       question(0)
     );
   }
@@ -120,11 +123,12 @@ function getReply(from, body) {
     const total = s.responses.reduce((a, b) => a + b, 0);
     const avg = (total / s.responses.length).toFixed(1);
     return (
-      `🎉 Assessment complete, ${s.data.name}!\n\n` +
-      `Your engagement score: ${avg} / 2\n\n` +
-      "We're matching you with career paths and institutions that fit your profile. " +
-      "You'll hear from us soon.\n\n" +
-      "Thank you for using Pathfinder! 🚀"
+      `🎉 You did it, ${s.data.name}!\n\n` +
+      "That's a real step most learners never take — you've started shaping your future on purpose. 🌟\n\n" +
+      "We're now matching your strengths to careers, the subjects you'll need, and colleges and bursaries that fit *you*. " +
+      "You'll get your personalised path shortly.\n\n" +
+      "Remember: the earlier you know your direction, the more choices you keep open. You're ahead of the game. 🚀\n\n" +
+      "_Reply RESTART anytime to take it again._"
     );
   }
 
