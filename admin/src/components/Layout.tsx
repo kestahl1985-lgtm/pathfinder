@@ -1,89 +1,81 @@
 import { useAuth } from "../lib/auth";
 import { Link, useLocation } from "react-router-dom";
+import { BarChart3, Users, Target, LogOut, Menu, X } from "lucide-react";
+import { useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const isActive = (path: string) => location.pathname === path;
 
+  const navItems = [
+    { path: "/", label: "Dashboard", icon: BarChart3 },
+    { path: "/students", label: "Students", icon: Users },
+    { path: "/leads", label: "Qualified Leads", icon: Target },
+  ];
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <nav
-        style={{
-          width: "250px",
-          backgroundColor: "#1f2937",
-          color: "white",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-        }}
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside
+        className={`${
+          sidebarOpen ? "w-64" : "w-20"
+        } bg-gradient-to-b from-slate-900 to-slate-800 text-white transition-all duration-300 flex flex-col border-r border-slate-700`}
       >
-        <h1 style={{ marginTop: 0, marginBottom: 30 }}>Pathfinder</h1>
-
-        <Link
-          to="/"
-          style={{
-            padding: "12px",
-            marginBottom: "10px",
-            backgroundColor: isActive("/") ? "#374151" : "transparent",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: "4px",
-          }}
-        >
-          📊 Dashboard
-        </Link>
-
-        <Link
-          to="/students"
-          style={{
-            padding: "12px",
-            marginBottom: "10px",
-            backgroundColor: isActive("/students") ? "#374151" : "transparent",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: "4px",
-          }}
-        >
-          👥 Students
-        </Link>
-
-        <Link
-          to="/leads"
-          style={{
-            padding: "12px",
-            marginBottom: "20px",
-            backgroundColor: isActive("/leads") ? "#374151" : "transparent",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: "4px",
-          }}
-        >
-          📋 Leads
-        </Link>
-
-        <div style={{ marginTop: "auto", paddingTop: "20px", borderTop: "1px solid #374151" }}>
-          <p style={{ marginBottom: "10px", fontSize: "14px" }}>{user?.email}</p>
+        {/* Logo */}
+        <div className="flex items-center justify-between p-6">
+          {sidebarOpen && <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Pathfinder</h1>}
           <button
-            onClick={() => signOut()}
-            style={{
-              width: "100%",
-              padding: "10px",
-              backgroundColor: "#dc2626",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1 hover:bg-slate-700 rounded-lg transition"
           >
-            Sign Out
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
-      </nav>
 
-      <main style={{ flex: 1, padding: "30px", backgroundColor: "#f9fafb", overflowY: "auto" }}>
-        {children}
+        {/* Navigation */}
+        <nav className="flex-1 px-4 space-y-2">
+          {navItems.map(({ path, label, icon: Icon }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                isActive(path)
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-slate-300 hover:bg-slate-700"
+              }`}
+            >
+              <Icon size={20} />
+              {sidebarOpen && <span className="font-medium">{label}</span>}
+            </Link>
+          ))}
+        </nav>
+
+        {/* User Section */}
+        <div className="p-4 border-t border-slate-700">
+          {sidebarOpen && (
+            <div className="mb-4 p-3 bg-slate-700 rounded-lg">
+              <p className="text-xs text-slate-400">Logged in as</p>
+              <p className="text-sm font-medium truncate">{user?.email}</p>
+            </div>
+          )}
+          <button
+            onClick={() => signOut()}
+            className="w-full flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition font-medium"
+          >
+            <LogOut size={18} />
+            {sidebarOpen && "Sign Out"}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        <div className="p-8">
+          {children}
+        </div>
       </main>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { useState } from "react";
+import { Filter, ArrowRight } from "lucide-react";
 
 interface Lead {
   id: string;
@@ -59,7 +60,7 @@ export default function LeadsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (leadId: string, newStatus: string) => {
+    mutationFn: async ({ leadId, newStatus }: { leadId: string; newStatus: string }) => {
       const { error } = await supabase
         .from("leads")
         .update({ status: newStatus })
@@ -74,15 +75,12 @@ export default function LeadsPage() {
   const filteredLeads =
     selectedStatus === "all" ? leads : leads.filter((l) => l.status === selectedStatus);
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      new: "#3b82f6",
-      contacted: "#8b5cf6",
-      interested: "#f59e0b",
-      enrolled: "#10b981",
-      rejected: "#ef4444",
-    };
-    return colors[status] || "#6b7280";
+  const statusConfig: Record<string, { color: string; bgColor: string; icon: string }> = {
+    new: { color: "text-blue-700", bgColor: "bg-blue-100", icon: "🆕" },
+    contacted: { color: "text-purple-700", bgColor: "bg-purple-100", icon: "📞" },
+    interested: { color: "text-orange-700", bgColor: "bg-orange-100", icon: "👀" },
+    enrolled: { color: "text-green-700", bgColor: "bg-green-100", icon: "✅" },
+    rejected: { color: "text-red-700", bgColor: "bg-red-100", icon: "❌" },
   };
 
   const getStudentName = (studentId: string) => {
@@ -99,92 +97,101 @@ export default function LeadsPage() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: "20px" }}>Qualified Leads</h1>
-
-      <div style={{ marginBottom: "20px" }}>
-        <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          style={{
-            padding: "10px",
-            border: "1px solid #d1d5db",
-            borderRadius: "4px",
-            backgroundColor: "white",
-          }}
-        >
-          <option value="all">All Leads</option>
-          <option value="new">New</option>
-          <option value="contacted">Contacted</option>
-          <option value="interested">Interested</option>
-          <option value="enrolled">Enrolled</option>
-          <option value="rejected">Rejected</option>
-        </select>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Qualified Leads</h1>
+        <p className="text-gray-600">Track and manage student enrollments</p>
       </div>
 
-      {leadsLoading && <p>Loading...</p>}
+      {/* Filter */}
+      <div className="mb-6 flex gap-3">
+        <div className="flex gap-2 flex-wrap">
+          {["all", "new", "contacted", "interested", "enrolled", "rejected"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setSelectedStatus(status)}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                selectedStatus === status
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {status === "all" ? "All Leads" : status.charAt(0).toUpperCase() + status.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {!leadsLoading && !filteredLeads.length && <p>No leads found.</p>}
+      {leadsLoading && <div className="text-center py-12 text-gray-500">Loading leads...</div>}
+
+      {!leadsLoading && filteredLeads.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-600 mb-2">No leads found</p>
+          <p className="text-sm text-gray-500">Students who complete assessments will appear here</p>
+        </div>
+      )}
 
       {filteredLeads.length > 0 && (
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "8px",
-            overflow: "hidden",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f3f4f6", borderBottom: "1px solid #e5e7eb" }}>
-                <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Student</th>
-                <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>College</th>
-                <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Status</th>
-                <th style={{ padding: "12px", textAlign: "left", fontWeight: "600" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.map((lead) => (
-                <tr key={lead.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
-                  <td style={{ padding: "12px" }}>{getStudentName(lead.student_id)}</td>
-                  <td style={{ padding: "12px" }}>{getCollegeName(lead.college_id)}</td>
-                  <td style={{ padding: "12px" }}>
-                    <span
-                      style={{
-                        backgroundColor: getStatusColor(lead.status) + "20",
-                        color: getStatusColor(lead.status),
-                        padding: "6px 12px",
-                        borderRadius: "4px",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px" }}>
-                    <select
-                      value={lead.status}
-                      onChange={(e) => updateMutation.mutate(lead.id, e.target.value)}
-                      style={{
-                        padding: "6px",
-                        border: "1px solid #d1d5db",
-                        borderRadius: "4px",
-                        backgroundColor: "white",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <option value="new">New</option>
-                      <option value="contacted">Contacted</option>
-                      <option value="interested">Interested</option>
-                      <option value="enrolled">Enrolled</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                  </td>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Student</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">College</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Update Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredLeads.map((lead) => {
+                  const config = statusConfig[lead.status];
+                  return (
+                    <tr key={lead.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                      <td className="px-6 py-4">
+                        <span className="font-medium text-gray-900">{getStudentName(lead.student_id)}</span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{getCollegeName(lead.college_id)}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${config.bgColor} ${config.color}`}>
+                          {config.icon} {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={lead.status}
+                          onChange={(e) =>
+                            updateMutation.mutate({
+                              leadId: lead.id,
+                              newStatus: e.target.value,
+                            })
+                          }
+                          disabled={updateMutation.isPending}
+                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none cursor-pointer disabled:opacity-50"
+                        >
+                          <option value="new">New</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="interested">Interested</option>
+                          <option value="enrolled">Enrolled</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 text-sm">
+                        {new Date(lead.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-semibold">{filteredLeads.length}</span> leads
+            </p>
+          </div>
         </div>
       )}
     </div>
