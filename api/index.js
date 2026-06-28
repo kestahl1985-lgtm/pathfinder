@@ -54,7 +54,7 @@ async function sendWhatsAppMessage(to, message) {
   });
 }
 
-// In-memory storage for demo (replace with Supabase in production)
+// In-memory storage (replace with Supabase in production)
 const students = new Map();
 
 const QUESTIONS = [
@@ -65,47 +65,100 @@ const QUESTIONS = [
   { num: 5, text: "Would you like to lead a team? (0=No, 1=Maybe, 2=Yes)" },
 ];
 
+// Onboarding steps
+const ONBOARDING_STEPS = ["name", "school", "age", "suburb", "grade"];
+
 // Handle incoming WhatsApp message
 async function handleWebhook(from, messageBody) {
   const studentPhone = from.replace("whatsapp:", "");
+  const trimmedInput = messageBody.trim();
 
+  // Initialize new student
   if (!students.has(studentPhone)) {
     students.set(studentPhone, {
       phone: from,
+      name: null,
+      school: null,
+      age: null,
+      suburb: null,
       grade: null,
-      status: "selecting_grade",
+      onboardingStep: 0,
+      status: "onboarding",
       currentQuestion: 0,
       responses: [],
     });
+
+    await sendWhatsAppMessage(
+      from,
+      "👋 Welcome to Pathfinder!\n\nThe free career guidance platform for South African students.\n\n📝 Let's get to know you better.\n\nWhat's your first name?"
+    );
+    return;
   }
 
   const student = students.get(studentPhone);
 
-  // Grade selection
-  if (!student.grade) {
-    const gradeNum = parseInt(messageBody);
-    if (gradeNum === 10 || gradeNum === 11 || gradeNum === 12) {
+  // ONBOARDING PHASE
+  if (student.status === "onboarding") {
+    const currentStep = ONBOARDING_STEPS[student.onboardingStep];
+
+    if (currentStep === "name") {
+      student.name = trimmedInput;
+      student.onboardingStep++;
+      await sendWhatsAppMessage(from, `Nice to meet you, ${student.name}! 👋\n\nWhat school do you attend?`);
+      return;
+    }
+
+    if (currentStep === "school") {
+      student.school = trimmedInput;
+      student.onboardingStep++;
+      await sendWhatsAppMessage(from, `Great! ${student.school} 🏫\n\nHow old are you? (e.g., 16)`);
+      return;
+    }
+
+    if (currentStep === "age") {
+      const age = parseInt(trimmedInput);
+      if (isNaN(age) || age < 13 || age > 25) {
+        await sendWhatsAppMessage(from, "Please enter a valid age (13-25)");
+        return;
+      }
+      student.age = age;
+      student.onboardingStep++;
+      await sendWhatsAppMessage(from, `Got it, you're ${age} years old! 🎂\n\nWhat suburb/area do you live in?`);
+      return;
+    }
+
+    if (currentStep === "suburb") {
+      student.suburb = trimmedInput;
+      student.onboardingStep++;
+      await sendWhatsAppMessage(
+        from,
+        `Perfect, ${student.suburb}! 📍\n\nWhat grade are you in?\n\n10 = Grade 10\n11 = Grade 11\n12 = Grade 12`
+      );
+      return;
+    }
+
+    if (currentStep === "grade") {
+      const gradeNum = parseInt(trimmedInput);
+      if (gradeNum !== 10 && gradeNum !== 11 && gradeNum !== 12) {
+        await sendWhatsAppMessage(from, "Invalid. Please reply with 10, 11, or 12");
+        return;
+      }
+
       student.grade = gradeNum;
       student.status = "in_assessment";
       student.currentQuestion = 1;
 
       await sendWhatsAppMessage(
         from,
-        `✅ Grade ${gradeNum} selected!\n\n📋 Starting Career Assessment (5 questions)\n\n${QUESTIONS[0].text}`
+        `✅ Grade ${gradeNum} selected!\n\n🎓 Your Profile:\n• Name: ${student.name}\n• School: ${student.school}\n• Age: ${student.age}\n• Area: ${student.suburb}\n\n📋 Starting Career Assessment (5 questions)\n\n${QUESTIONS[0].text}`
       );
       return;
     }
-
-    await sendWhatsAppMessage(
-      from,
-      "Welcome to Pathfinder! 🚀\n\nWhat grade are you in?\n10 = Grade 10\n11 = Grade 11\n12 = Grade 12"
-    );
-    return;
   }
 
-  // Assessment in progress
+  // ASSESSMENT PHASE
   if (student.status === "in_assessment") {
-    const answer = parseInt(messageBody);
+    const answer = parseInt(trimmedInput);
     if (isNaN(answer) || answer < 0 || answer > 2) {
       await sendWhatsAppMessage(from, "Invalid. Reply with 0, 1, or 2");
       return;
@@ -120,7 +173,7 @@ async function handleWebhook(from, messageBody) {
 
       await sendWhatsAppMessage(
         from,
-        `🎉 Assessment Complete!\n\nYour Score: ${avgScore}/2\n\nWe're analyzing your results and will match you with perfect career paths soon!\n\nThank you for using Pathfinder! 🎓`
+        `🎉 Assessment Complete!\n\nYour Score: ${avgScore}/2\n\nWe're analyzing your results and will match you with perfect career paths soon!\n\nThank you for using Pathfinder, ${student.name}! 🚀`
       );
       return;
     }
