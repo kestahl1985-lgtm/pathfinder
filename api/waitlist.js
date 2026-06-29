@@ -20,6 +20,22 @@ function setCors(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
+// Simple per-IP rate limit (in-memory; per warm instance — basic abuse brake).
+const _rl = new Map();
+function rateLimited(ip) {
+  const now = Date.now();
+  const e = _rl.get(ip) || { count: 0, start: now };
+  if (now - e.start > 60000) { e.count = 0; e.start = now; }
+  e.count += 1;
+  _rl.set(ip, e);
+  return e.count > 6; // max 6 signups/min per IP
+}
+
+// A contact should look like a phone number or an email.
+function validContact(c) {
+  return /\d{6,}/.test(c.replace(/\s/g, "")) || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c);
+}
+
 module.exports = async (req, res) => {
   setCors(req, res);
 
@@ -31,17 +47,30 @@ module.exports = async (req, res) => {
     return;
   }
 
+  res.setHeader("Content-Type", "application/json");
+
+  // Rate limit per IP
+  const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+  if (rateLimited(ip)) { res.statusCode = 429; res.end(JSON.stringify({ error: "Too many requests" })); return; }
+
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch { body = {}; } }
   body = body || {};
 
+  // Honeypot: real users never fill this hidden field. Bots do → silently accept.
+  if (String(body.website || "").trim()) { res.statusCode = 200; res.end(JSON.stringify({ ok: true })); return; }
+
   const name = String(body.name || "").trim().slice(0, 80);
   const contact = String(body.contact || "").trim().slice(0, 80);
 
-  res.setHeader("Content-Type", "application/json");
   if (!name || !contact) {
     res.statusCode = 400;
     res.end(JSON.stringify({ error: "Name and contact are required" }));
+    return;
+  }
+  if (!validContact(contact)) {
+    res.statusCode = 400;
+    res.end(JSON.stringify({ error: "Please enter a valid phone number or email" }));
     return;
   }
   if (!SUPABASE_URL || !SUPABASE_KEY) {

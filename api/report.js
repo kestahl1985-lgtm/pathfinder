@@ -36,6 +36,13 @@ function supaGet(path) {
   });
 }
 
+// Strip characters the PDF font (WinAnsi) can't encode (emoji, non-Latin
+// scripts) so user-supplied names/schools can never crash report generation.
+function clean(s, max = 60) {
+  if (s == null) return "";
+  return String(s).replace(/[^\x20-\xFF]/g, "").slice(0, max).trim();
+}
+
 function wrap(text, font, size, maxWidth) {
   const words = String(text).split(/\s+/);
   const lines = [];
@@ -102,8 +109,8 @@ async function buildReportPdf(d) {
   }
 
   // ---- Intro ----
-  T(`Prepared for ${d.name || "you"}`, M, y, bold, 22, DARK); y -= 22;
-  const profile = [d.school, d.grade ? `Grade ${d.grade}` : null, d.age ? `Age ${d.age}` : null, d.suburb].filter(Boolean).join("   ·   ");
+  T(`Prepared for ${clean(d.name) || "you"}`, M, y, bold, 22, DARK); y -= 22;
+  const profile = [clean(d.school, 50), d.grade ? `Grade ${d.grade}` : null, d.age ? `Age ${d.age}` : null, clean(d.suburb, 40)].filter(Boolean).join("   ·   ");
   if (profile) { T(profile, M, y, font, 11, GREY); y -= 12; }
   y -= 22;
 
@@ -207,7 +214,14 @@ module.exports = async (req, res) => {
   const rows = await supaGet(`whatsapp_sessions?report_token=eq.${encodeURIComponent(token)}&select=data&limit=1`);
   if (!Array.isArray(rows) || !rows.length) { res.statusCode = 404; res.end("Report not found"); return; }
 
-  const bytes = await buildReportPdf(rows[0].data || {});
+  let bytes;
+  try {
+    bytes = await buildReportPdf(rows[0].data || {});
+  } catch (e) {
+    res.statusCode = 500;
+    res.end("Could not generate report");
+    return;
+  }
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", 'inline; filename="Vula-Career-Report.pdf"');

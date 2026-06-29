@@ -196,12 +196,12 @@ function advance(s, input, rawBody) {
   }
 
   if (s.step === "name") {
-    s.data.name = rawBody;
+    s.data.name = rawBody.slice(0, 40);
     s.step = "school";
     return [{ type: "text", text: `Nice to meet you, ${rawBody}! 🎓\n\nWhich school do you attend?` }];
   }
   if (s.step === "school") {
-    s.data.school = rawBody;
+    s.data.school = rawBody.slice(0, 60);
     s.step = "age";
     return [{ type: "text", text: `Got it — ${rawBody}. 🏫\n\nHow old are you? (e.g. 16)` }];
   }
@@ -213,7 +213,7 @@ function advance(s, input, rawBody) {
     return [{ type: "text", text: "Thanks! 🎂\n\nWhich suburb or area do you live in?" }];
   }
   if (s.step === "suburb") {
-    s.data.suburb = rawBody;
+    s.data.suburb = rawBody.slice(0, 40);
     s.step = "grade";
     return [{ type: "grade", text: `📍 ${rawBody} — noted.\n\nWhat grade are you in?` }];
   }
