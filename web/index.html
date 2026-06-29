@@ -222,6 +222,22 @@
       .sticky-cta .btn { width: 100%; }
       @media (min-width: 880px) { .sticky-cta { display: none; } }
 
+      /* ---------- Waitlist modal ---------- */
+      .wl-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(4,7,18,.78); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
+      .wl-modal { position: relative; width: 100%; max-width: 440px; background: linear-gradient(180deg, #121a36, #0c1126); border: 1px solid var(--border); border-radius: 22px; padding: 32px 26px; box-shadow: 0 40px 90px -30px rgba(0,0,0,.8); }
+      .wl-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--muted); font-size: 26px; line-height: 1; cursor: pointer; }
+      .wl-close:hover { color: #fff; }
+      .wl-title { font-family: "Sora"; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+      .wl-lead { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 22px; }
+      .wl-form { display: flex; flex-direction: column; gap: 12px; }
+      .wl-form input[type="text"] { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: #fff; font-size: 15px; font-family: "Inter"; }
+      .wl-form input[type="text"]::placeholder { color: #6b7490; }
+      .wl-form input[type="text"]:focus { outline: none; border-color: var(--brand); }
+      .wl-consent { display: flex; gap: 9px; align-items: flex-start; color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 4px 0 6px; }
+      .wl-consent input { margin-top: 2px; }
+      .wl-consent a { color: var(--brand-2); }
+      .wl-success { text-align: center; font-size: 16px; color: #d7ffe6; line-height: 1.6; padding: 10px 0; }
+
       .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
       .reveal.show { opacity: 1; transform: none; }
     </style>
@@ -247,7 +263,7 @@
           <a href="#why">Why it matters</a>
           <a href="#faq">FAQ</a>
         </div>
-        <a class="btn btn-wa wa-cta" style="padding:11px 20px;font-size:15px">Start free</a>
+        <a class="btn btn-wa wa-cta" style="padding:11px 20px;font-size:15px">Join waitlist</a>
       </div>
     </nav>
 
@@ -257,7 +273,7 @@
       <div class="blob" style="width:480px;height:480px;background:#14b8d4;top:40px;right:-160px;opacity:.35"></div>
       <div class="wrap hero-grid">
         <div>
-          <span class="pill"><span class="dot"></span> Free · No app · Works on any phone</span>
+          <span class="pill"><span class="dot"></span> 🚀 Launching soon · Join the waitlist</span>
           <h1 class="hero">Open your future.<br /><span class="grad-text">Right here on WhatsApp.</span></h1>
           <p class="hero-sub">
             Not sure what to study or which career fits you? Vula reveals your natural strengths, the careers you'd
@@ -266,7 +282,7 @@
           <div class="hero-cta">
             <a class="btn btn-wa wa-cta">
               <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 .4C7.4.4.5 7.3.5 15.9c0 2.8.7 5.4 2 7.8L.4 31.6l8.1-2.1c2.3 1.2 4.8 1.9 7.5 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.4 16 .4zm0 28.2c-2.4 0-4.6-.6-6.5-1.8l-.5-.3-4.8 1.3 1.3-4.7-.3-.5c-1.3-2-2-4.4-2-6.9C3 8.9 8.8 3.1 16 3.1S29 8.9 29 16.1 23.2 28.6 16 28.6zm7.3-9.4c-.4-.2-2.4-1.2-2.7-1.3-.4-.1-.7-.2-.9.2-.3.4-1 1.3-1.3 1.6-.2.2-.4.3-.8.1-2.4-1.2-3.9-2.1-5.5-4.8-.4-.7.4-.6 1.1-2.1.1-.2.1-.5 0-.6-.1-.2-.9-2.1-1.2-2.9-.3-.7-.6-.6-.9-.7h-.7c-.2 0-.6.1-.9.5-.3.4-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.5 3.8 6 5.3 2.2 1 3.1 1 4.2.9.7-.1 2.4-1 2.7-1.9.3-.9.3-1.7.2-1.9-.1-.2-.4-.3-.8-.5z"/></svg>
-              Start free on WhatsApp
+              Join the waitlist
             </a>
             <a href="#how" class="btn btn-ghost">See how it works</a>
           </div>
@@ -436,7 +452,7 @@
             <p>Join thousands of learners choosing their path on purpose. Free, 5 minutes, right now.</p>
             <a class="btn btn-wa wa-cta" style="font-size:18px;padding:18px 34px">
               <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 .4C7.4.4.5 7.3.5 15.9c0 2.8.7 5.4 2 7.8L.4 31.6l8.1-2.1c2.3 1.2 4.8 1.9 7.5 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.4 16 .4zm0 28.2c-2.4 0-4.6-.6-6.5-1.8l-.5-.3-4.8 1.3 1.3-4.7-.3-.5c-1.3-2-2-4.4-2-6.9C3 8.9 8.8 3.1 16 3.1S29 8.9 29 16.1 23.2 28.6 16 28.6z"/></svg>
-              Start free on WhatsApp
+              Join the waitlist
             </a>
           </div>
         </div>
@@ -463,20 +479,61 @@
     <div class="sticky-cta">
       <a class="btn btn-wa wa-cta">
         <svg viewBox="0 0 32 32" fill="currentColor" style="width:20px;height:20px"><path d="M16 .4C7.4.4.5 7.3.5 15.9c0 2.8.7 5.4 2 7.8L.4 31.6l8.1-2.1c2.3 1.2 4.8 1.9 7.5 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.4 16 .4z"/></svg>
-        Start free on WhatsApp
+        Join the waitlist
       </a>
     </div>
 
+    <!-- Waitlist modal -->
+    <div id="wl-overlay" class="wl-overlay">
+      <div class="wl-modal">
+        <button id="wl-close" class="wl-close" aria-label="Close">×</button>
+        <h3 class="wl-title">Join the waitlist 🚀</h3>
+        <p class="wl-lead">Vula is launching soon. Leave your details and we'll send you a WhatsApp the moment it's live.</p>
+        <form id="wl-form" class="wl-form">
+          <input name="name" type="text" placeholder="Your first name" required maxlength="80" />
+          <input name="contact" type="text" placeholder="WhatsApp number (e.g. 082 123 4567)" required maxlength="80" />
+          <label class="wl-consent">
+            <input type="checkbox" required />
+            <span>I agree to be contacted and accept the <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>. If under 18, I have a parent/guardian's permission.</span>
+          </label>
+          <button type="submit" class="btn btn-wa" style="width:100%">Join the waitlist</button>
+        </form>
+        <div id="wl-success" class="wl-success" hidden>🎉 You're on the list! We'll WhatsApp you the moment Vula opens.</div>
+      </div>
+    </div>
+
     <script>
-      // ---- WhatsApp deep-link config ----
-      // Set this to your WhatsApp number (international format, no +).
-      // For the Twilio Sandbox, learners must first send the join phrase — set PREFILL to "join your-code".
-      // Twilio WhatsApp SANDBOX number. While on the sandbox, a learner must
-      // first send the join phrase, so PREFILL is set to "join <your-code>".
-      var WHATSAPP_NUMBER = "14155238886";
-      var PREFILL = "join mark-tail"; // Twilio sandbox join phrase (temporary, until a production number)
-      var waLink = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(PREFILL);
-      document.querySelectorAll(".wa-cta").forEach(function (a) { a.setAttribute("href", waLink); });
+      // ---- Waitlist (pre-launch) ----
+      var WAITLIST_ENDPOINT = "https://pathfinder-backend-one.vercel.app/waitlist";
+      var overlay = document.getElementById("wl-overlay");
+      function openWL(e) { if (e) e.preventDefault(); overlay.style.display = "flex"; }
+      function closeWL() { overlay.style.display = "none"; }
+      document.querySelectorAll(".wa-cta").forEach(function (a) {
+        a.setAttribute("href", "#");
+        a.addEventListener("click", openWL);
+      });
+      document.getElementById("wl-close").addEventListener("click", closeWL);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay) closeWL(); });
+      document.getElementById("wl-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var f = e.target;
+        var data = new FormData(f);
+        var btn = f.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.textContent = "Joining…";
+        try {
+          var r = await fetch(WAITLIST_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: data.get("name"), contact: data.get("contact") }),
+          });
+          if (!r.ok) throw new Error("bad");
+          f.style.display = "none";
+          document.getElementById("wl-success").hidden = false;
+        } catch (err) {
+          btn.disabled = false; btn.textContent = "Join the waitlist";
+          alert("Sorry, something went wrong. Please try again.");
+        }
+      });
 
       document.getElementById("yr").textContent = new Date().getFullYear();
 
