@@ -2,5 +2,8 @@
   "name": "pathfinder",
   "version": "1.0.0",
   "description": "WhatsApp RIASEC career assessment platform for South African high school students",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
 }

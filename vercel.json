@@ -19,6 +19,7 @@
     { "src": "/health", "dest": "/api/health.js" },
     { "src": "/stats", "dest": "/api/stats.js" },
     { "src": "/waitlist", "dest": "/api/waitlist.js" },
+    { "src": "/report", "dest": "/api/report.js" },
     { "src": "/cleanup", "dest": "/api/cleanup.js" },
     { "src": "/", "dest": "/public/index.html" }
   ],
