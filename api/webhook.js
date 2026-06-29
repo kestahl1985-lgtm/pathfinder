@@ -9,6 +9,7 @@
 // service is unconfigured, so it always responds.
 
 const https = require("https");
+const crypto = require("crypto");
 
 // --- Twilio ---
 const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -29,6 +30,50 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const hasTwilio = () => Boolean(ACCOUNT_SID && AUTH_TOKEN && PHONE_NUMBER);
 const hasSupabase = () => Boolean(SUPABASE_URL && SUPABASE_KEY);
 const memory = {};
+
+// ===================== Security =====================
+// Verify the request genuinely came from Twilio (X-Twilio-Signature).
+// Twilio signs: the full request URL + each POST param (sorted by key,
+// concatenated as key+value), HMAC-SHA1 with the auth token, base64.
+// We test a few candidate URLs to tolerate Vercel's path rewrite; set
+// WEBHOOK_URL in env to the exact configured URL for certainty.
+function validateTwilioSignature(req) {
+  const sig = req.headers["x-twilio-signature"];
+  if (!sig || !AUTH_TOKEN) return false;
+  const params = req.body && typeof req.body === "object" ? req.body : {};
+  const sortedKeys = Object.keys(params).sort();
+  const host = req.headers["x-forwarded-host"] || req.headers["host"];
+  const candidates = [];
+  if (process.env.WEBHOOK_URL) candidates.push(process.env.WEBHOOK_URL);
+  if (host) {
+    candidates.push(`https://${host}/webhook`);
+    if (req.url) candidates.push(`https://${host}${req.url}`);
+  }
+  return candidates.some((url) => {
+    let data = url;
+    for (const k of sortedKeys) data += k + params[k];
+    const expected = crypto.createHmac("sha1", AUTH_TOKEN).update(Buffer.from(data, "utf-8")).digest("base64");
+    try {
+      return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig));
+    } catch {
+      return false;
+    }
+  });
+}
+
+// Basic per-sender rate limit (defence in depth; primary control is the
+// signature check above). In-memory, so it is per warm instance.
+const _rl = new Map();
+function rateLimited(key) {
+  const now = Date.now();
+  const WINDOW = 60000;
+  const MAX = 40; // messages per minute per sender
+  const e = _rl.get(key) || { count: 0, start: now };
+  if (now - e.start > WINDOW) { e.count = 0; e.start = now; }
+  e.count += 1;
+  _rl.set(key, e);
+  return e.count > MAX;
+}
 
 // ===================== Assessment =====================
 const TRAIT_NAMES = {
@@ -478,11 +523,31 @@ const emptyTwiml = () => `<?xml version="1.0" encoding="UTF-8"?><Response></Resp
 
 // ===================== Handler =====================
 module.exports = async (req, res) => {
+  // --- Security gate: only accept genuine, signed Twilio requests ---
+  // Enforced whenever Twilio is configured. Set TWILIO_VALIDATION=off only
+  // as a temporary escape hatch (not recommended).
+  if (hasTwilio() && process.env.TWILIO_VALIDATION !== "off") {
+    if (!validateTwilioSignature(req)) {
+      res.statusCode = 403;
+      res.setHeader("Content-Type", "text/plain");
+      res.end("Forbidden");
+      return;
+    }
+  }
+
   const body = req.body || {};
   const from = body.From || "";
   const rawBody = (body.Body || "").trim();
   const buttonPayload = (body.ButtonPayload || "").trim();
   const input = buttonPayload || rawBody;
+
+  // --- Rate limit per sender (defence in depth) ---
+  if (from && rateLimited(from)) {
+    res.statusCode = 429;
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Too Many Requests");
+    return;
+  }
 
   const cmd = rawBody.toUpperCase();
 
