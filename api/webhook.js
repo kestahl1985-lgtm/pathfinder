@@ -16,6 +16,11 @@ const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const SID_YESNO = process.env.CONTENT_SID_YESNO || "HX94ea41518e35dd7bd5c666b8b2f968d6";
 const SID_GRADE = process.env.CONTENT_SID_GRADE || "HX8c9397cd6d8cc5c9cac8c478e51768ab";
+const SID_CONSENT = process.env.CONTENT_SID_CONSENT || "HX389c1fc2e0a23ff51e7145227d8b8287";
+const SID_SHARE = process.env.CONTENT_SID_SHARE || "HX77d094aff572d25bd61676055a75e7ef";
+
+// Public URL of the privacy policy (update when the site is on its own domain)
+const PRIVACY_URL = process.env.PRIVACY_URL || "https://vula.co.za/privacy.html";
 
 // --- Supabase ---
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -222,6 +227,20 @@ function careerDetailText(s, c) {
 
 // ===================== State machine =====================
 function advance(s, input, rawBody) {
+  if (s.step === "consent") {
+    const v = (input || "").toLowerCase();
+    if (v === "more") {
+      return [{ type: "consent", text: MORE_INFO_TEXT }];
+    }
+    if (v === "agree" || v === "yes" || v === "i agree" || v.includes("agree")) {
+      s.data.consent = true;
+      s.data.consent_at = new Date().toISOString();
+      s.step = "name";
+      return [{ type: "text", text: "Thank you! 🙌\n\nLet's begin — what's your *first name*?" }];
+    }
+    return [{ type: "consent", text: "To use Vula we need your agreement to continue. Tap *I agree*, or *More info* to learn more. 👇" }];
+  }
+
   if (s.step === "name") {
     s.data.name = rawBody;
     s.step = "school";
@@ -271,9 +290,9 @@ function advance(s, input, rawBody) {
 
     if (s.q < QUESTIONS.length) return [{ type: "yesno", text: questionText(s.q) }];
 
-    // Finished — compute matches and present the career list
+    // Finished — compute matches, present results, then ask sharing consent
     computeMatches(s);
-    s.step = "results";
+    s.step = "share_consent";
     return [
       {
         type: "text",
@@ -282,7 +301,25 @@ function advance(s, input, rawBody) {
           `${gradeTip(s.data.grade)}\n\nHere's what your profile reveals 👇`,
       },
       { type: "text", text: resultsListText(s) },
+      shareQuestionPiece(s.data.name),
     ];
+  }
+
+  if (s.step === "share_consent") {
+    const v = (input || "").toLowerCase();
+    if (v === "yes" || v === "no") {
+      s.data.share_consent = v === "yes";
+      s.data.share_consent_at = new Date().toISOString();
+      s.step = "exploring";
+      const ack = v === "yes"
+        ? "🎉 Great! We'll match you with relevant colleges and bursaries, and they may reach out with opportunities. You can opt out anytime by replying *STOP*."
+        : "👍 No problem — your details stay private and won't be shared. You can change your mind anytime.";
+      return [
+        { type: "text", text: ack },
+        { type: "text", text: "Now explore your matches 👇\n\n" + menuText(s) },
+      ];
+    }
+    return [shareQuestionPiece(s.data.name)];
   }
 
   if (s.step === "results" || s.step === "exploring") {
@@ -305,15 +342,39 @@ function advance(s, input, rawBody) {
   return [{ type: "text", text: "Reply RESTART to begin again." }];
 }
 
+// First message: welcome + consent gate (POPIA). Learner must agree before
+// we collect any personal information.
 function welcomePiece() {
   return {
-    type: "text",
+    type: "consent",
     text:
       "👋 Welcome to *Vula* — your free career guide on WhatsApp!\n\n" +
-      "Choosing a career can feel overwhelming. Most learners only start thinking about it in matric — but the subjects you pick in Grade 9, 10 and 11 already shape the doors that stay open to you. 🚪\n\n" +
-      "Vula helps you discover *what you're naturally good at*, the careers that fit you, and the exact subjects and marks you'll need to get there.\n\n" +
-      "It takes about 5 minutes, you can pause and pick up anytime, and it's completely free. 🌱\n\n" +
-      "Let's begin! What's your *first name*?",
+      "Before we start, a quick note on your privacy:\n" +
+      "• We'll ask a few details (name, school, age, area, grade) to give you accurate guidance.\n" +
+      "• Your info is kept private and used only to help you.\n" +
+      "• If you're under 18, please make sure a *parent or guardian* is happy for you to continue.\n\n" +
+      `Read how we protect your info: ${PRIVACY_URL}\n\n` +
+      "Tap *I agree* to begin. 👇",
+  };
+}
+
+const MORE_INFO_TEXT =
+  "🔒 *How Vula uses your info*\n\n" +
+  "• We only collect what's needed to guide you: name, school, age, area, grade and your answers.\n" +
+  "• We never ask for ID numbers, passwords or banking details.\n" +
+  "• We *only* share your details with colleges or bursary programmes if you choose to be connected — and you can opt out anytime.\n" +
+  "• You can reply *DELETE* at any time to remove your information.\n\n" +
+  `Full policy: ${PRIVACY_URL}\n\n` +
+  "Tap *I agree* to continue. 👇";
+
+function shareQuestionPiece(name) {
+  return {
+    type: "share",
+    text:
+      `📨 One last thing, ${name}:\n\n` +
+      "Would you like Vula to connect you with colleges, universities and bursary programmes that match your results? " +
+      "They may contact you about opportunities.\n\n" +
+      "You can say no — you'll still keep all your results.",
   };
 }
 
@@ -393,6 +454,8 @@ function sendPiece(to, piece) {
   const base = { From: `whatsapp:${PHONE_NUMBER}`, To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}` };
   if (piece.type === "yesno") return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "grade") return twilioPost({ ...base, ContentSid: SID_GRADE, ContentVariables: JSON.stringify({ 1: piece.text }) });
+  if (piece.type === "consent") return twilioPost({ ...base, ContentSid: SID_CONSENT, ContentVariables: JSON.stringify({ 1: piece.text }) });
+  if (piece.type === "share") return twilioPost({ ...base, ContentSid: SID_SHARE, ContentVariables: JSON.stringify({ 1: piece.text }) });
   return twilioPost({ ...base, Body: piece.text });
 }
 
@@ -401,6 +464,8 @@ function renderFallback(pieces) {
   return pieces.map((p) => {
     if (p.type === "yesno") return `${p.text}\n\nReply: 0 = No   1 = Maybe   2 = Yes`;
     if (p.type === "grade") return `${p.text}\n\nReply: 10, 11 or 12`;
+    if (p.type === "consent") return `${p.text}\n\nReply AGREE to continue, or MORE for more info.`;
+    if (p.type === "share") return `${p.text}\n\nReply YES or NO.`;
     return p.text;
   }).join("\n\n");
 }
@@ -419,18 +484,34 @@ module.exports = async (req, res) => {
   const buttonPayload = (body.ButtonPayload || "").trim();
   const input = buttonPayload || rawBody;
 
-  if (rawBody.toUpperCase() === "RESTART") await deleteSession(from);
+  const cmd = rawBody.toUpperCase();
+
+  // POPIA: let users delete their data or stop messages at any time.
+  if (cmd === "DELETE") {
+    await deleteSession(from);
+    const pieces = [{ type: "text", text: "🗑️ Done — your information has been deleted from Vula. Reply *Hi* anytime to start fresh." }];
+    return await respond(res, from, pieces);
+  }
+  if (cmd === "STOP") {
+    const pieces = [{ type: "text", text: "👋 You won't receive more messages from Vula. Reply *Hi* anytime to resume. To delete your info, reply *DELETE*." }];
+    return await respond(res, from, pieces);
+  }
+  if (cmd === "RESTART") await deleteSession(from);
 
   let session = await loadSession(from);
   let pieces;
   if (!session) {
-    session = { phone: from, step: "name", data: {}, q: 0, responses: [] };
+    session = { phone: from, step: "consent", data: {}, q: 0, responses: [] };
     pieces = [welcomePiece()];
   } else {
     pieces = advance(session, input, rawBody);
   }
   await saveSession(session);
+  return await respond(res, from, pieces);
+};
 
+// Sends pieces via Twilio (buttons), or replies with plain-text TwiML fallback.
+async function respond(res, from, pieces) {
   if (hasTwilio()) {
     try {
       for (const piece of pieces) await sendPiece(from, piece);
@@ -443,4 +524,4 @@ module.exports = async (req, res) => {
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/xml");
   res.end(twimlResponse(renderFallback(pieces)));
-};
+}
