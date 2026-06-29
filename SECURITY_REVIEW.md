@@ -129,7 +129,7 @@ The backend (`api/`) has **no third-party runtime dependencies** (uses Node's bu
 
 | # | Finding | Code status | Your action to activate |
 |---|---------|-------------|-------------------------|
-| 1 | Permissive RLS | ✅ Migration written | **Run** `supabase/migrations/20260629000001_security_rls.sql` in Supabase SQL Editor; seed your real admin email into `admin_allowlist` |
+| 1 | Permissive RLS | ✅ **APPLIED & VERIFIED** (29 Jun 2026) — lockdown SQL run; confirmed the anon key can no longer read student PII (`[]`), service role still works. Allowlist seeded with `admin@pathfinder.local`. | Done |
 | 2 | Webhook signature | ✅ Implemented & tested | Set `WEBHOOK_URL=https://pathfinder-backend-one.vercel.app/webhook` in Vercel; redeploy |
 | 3 | Rotate secrets | ⚠️ You only | Rotate Twilio Auth Token + (if possible) Supabase service key; update Vercel env |
 | 4 | Rate limiting | ✅ Implemented & tested | None (active on deploy) |
