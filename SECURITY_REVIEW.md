@@ -125,6 +125,21 @@ The backend (`api/`) has **no third-party runtime dependencies** (uses Node's bu
 
 ---
 
+## Remediation status (29 June 2026)
+
+| # | Finding | Code status | Your action to activate |
+|---|---------|-------------|-------------------------|
+| 1 | Permissive RLS | ✅ Migration written | **Run** `supabase/migrations/20260629000001_security_rls.sql` in Supabase SQL Editor; seed your real admin email into `admin_allowlist` |
+| 2 | Webhook signature | ✅ Implemented & tested | Set `WEBHOOK_URL=https://pathfinder-backend-one.vercel.app/webhook` in Vercel; redeploy |
+| 3 | Rotate secrets | ⚠️ You only | Rotate Twilio Auth Token + (if possible) Supabase service key; update Vercel env |
+| 4 | Rate limiting | ✅ Implemented & tested | None (active on deploy) |
+| 5 | Retention job | ✅ Implemented | Set `CRON_SECRET` (and optional `RETENTION_DAYS`) in Vercel; redeploy |
+| 6 | Server-side admin authz | ◻️ Mitigated by #1 | Future: move admin reads behind backend (optional once #1 is applied) |
+| 7 | Security headers | ✅ Added (web/admin/backend) | Verify the admin still loads after deploy (CSP allows Tailwind CDN; self-hosting Tailwind would let us drop `unsafe-eval`) |
+| 8 | Dependency hygiene | ◻️ Ongoing | Enable Dependabot / run `npm audit` periodically |
+
+After #1 is applied and #3 is done, the critical and high-severity issues are closed.
+
 ## Recommended order of remediation
 
 1. **Lock down the database (Finding #1)** — highest impact, do first.
