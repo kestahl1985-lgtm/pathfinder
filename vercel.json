@@ -8,6 +8,7 @@
     { "src": "/webhook", "dest": "/api/webhook.js" },
     { "src": "/health", "dest": "/api/health.js" },
     { "src": "/stats", "dest": "/api/stats.js" },
+    { "src": "/diag", "dest": "/api/diag.js" },
     { "src": "/", "dest": "/public/index.html" }
   ]
 }
