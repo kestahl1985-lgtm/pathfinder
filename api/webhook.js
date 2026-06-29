@@ -1,4 +1,4 @@
-// Pathfinder WhatsApp webhook.
+// Vula WhatsApp webhook.
 //
 // Flow: onboarding → 30-question RIASEC assessment (tappable buttons) →
 // matched career list with reasoning → tap a number to explore a career
@@ -309,9 +309,9 @@ function welcomePiece() {
   return {
     type: "text",
     text:
-      "👋 Welcome to *Pathfinder* — your free career guide on WhatsApp!\n\n" +
+      "👋 Welcome to *Vula* — your free career guide on WhatsApp!\n\n" +
       "Choosing a career can feel overwhelming. Most learners only start thinking about it in matric — but the subjects you pick in Grade 9, 10 and 11 already shape the doors that stay open to you. 🚪\n\n" +
-      "Pathfinder helps you discover *what you're naturally good at*, the careers that fit you, and the exact subjects and marks you'll need to get there.\n\n" +
+      "Vula helps you discover *what you're naturally good at*, the careers that fit you, and the exact subjects and marks you'll need to get there.\n\n" +
       "It takes about 5 minutes, you can pause and pick up anytime, and it's completely free. 🌱\n\n" +
       "Let's begin! What's your *first name*?",
   };

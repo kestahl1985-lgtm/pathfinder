@@ -39,7 +39,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="text-center">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
-              Pathfinder
+              Vula
             </h1>
             <p className="text-gray-600">Admin Dashboard</p>
           </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-600">
-            Secure admin access to Pathfinder
+            Secure admin access to Vula
           </p>
         </div>
       </div>

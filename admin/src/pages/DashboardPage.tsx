@@ -93,7 +93,7 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
         <p className="text-gray-600 flex items-center gap-2">
           <Calendar size={16} />
-          Overview of your Pathfinder platform
+          Overview of your Vula platform
         </p>
       </div>
 

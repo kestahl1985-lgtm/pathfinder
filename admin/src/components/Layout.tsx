@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       >
         {/* Logo */}
         <div className="flex items-center justify-between p-6">
-          {sidebarOpen && <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Pathfinder</h1>}
+          {sidebarOpen && <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Vula</h1>}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1 hover:bg-slate-700 rounded-lg transition"
