@@ -21,7 +21,7 @@ const SID_CONSENT = process.env.CONTENT_SID_CONSENT || "HX389c1fc2e0a23ff51e7145
 const SID_SHARE = process.env.CONTENT_SID_SHARE || "HX77d094aff572d25bd61676055a75e7ef";
 
 // Public URL of the privacy policy (update when the site is on its own domain)
-const PRIVACY_URL = process.env.PRIVACY_URL || "https://vula.co.za/privacy.html";
+const PRIVACY_URL = process.env.PRIVACY_URL || "https://vulacareers.co.za/privacy.html";
 
 // --- Supabase ---
 const SUPABASE_URL = process.env.SUPABASE_URL;
