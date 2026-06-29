@@ -107,6 +107,20 @@ async function buildReportPdf(d) {
   if (profile) { T(profile, M, y, font, 11, GREY); y -= 12; }
   y -= 22;
 
+  // ---- "Did you know?" motivational banner ----
+  {
+    const note = "Most learners only start thinking about careers in matric — but the subjects you choose in Grades 9 to 11 already shape which paths stay open. By doing this today, you're already ahead.";
+    const lines = wrap(note, font, 9.5, CW - 30);
+    const topY = y + 6;
+    const bh = 20 + lines.length * 12;
+    page.drawRectangle({ x: M, y: topY - bh, width: CW, height: bh, color: rgb(0.953, 0.961, 1) });
+    page.drawRectangle({ x: M, y: topY - bh, width: 4, height: bh, color: LIME });
+    T("DID YOU KNOW?", M + 16, y, bold, 10, BRAND);
+    let ny = y - 14;
+    lines.forEach((ln) => { T(ln, M + 16, ny, font, 9.5, INK); ny -= 12; });
+    y = topY - bh - 18;
+  }
+
   // ---- Strengths bar chart ----
   section("YOUR STRENGTHS");
   const order = ["R", "I", "A", "S", "E", "C"].sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
