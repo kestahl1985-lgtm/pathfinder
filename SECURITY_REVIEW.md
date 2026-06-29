@@ -140,6 +140,31 @@ The backend (`api/`) has **no third-party runtime dependencies** (uses Node's bu
 
 After #1 is applied and #3 is done, the critical and high-severity issues are closed.
 
+## Full re-inspection — 30 June 2026 (post-launch)
+
+Probed the live system top-to-bottom after the domain, waitlist, and PDF report were added.
+
+### ✅ Verified secure
+- **No secrets in git**; `.env*` and `.vercel` are gitignored; Twilio token & Supabase service key confirmed absent from the repo.
+- **Database fully locked from the public anon key** — `students`, `leads`, `waitlist`, `whatsapp_sessions`, `admin_allowlist`, `assessments` all return `[]` to anon.
+- **Webhook** rejects forged/unsigned requests → `403`.
+- **/report** is token-gated → `400` without token, `404` on a bad token (80-bit random tokens).
+- **/cleanup** requires `CRON_SECRET` → `401` without it.
+- **Security headers** (CSP, HSTS, X-Frame-Options, etc.) live on `vulacareers.co.za`; valid TLS cert; `www`→apex 308 redirect.
+
+### 🔧 Fixed this pass
+- **PDF report could crash on emoji / non-Latin names** (WinAnsi encoding) → user text is now sanitised; render wrapped in try/catch. (Medium)
+- **Waitlist had no abuse protection** → added per-IP rate limit (6/min), a honeypot field, and contact-format validation. (Medium)
+- **Free-text fields uncapped** → name/school/suburb now length-limited. (Low)
+- **Enabled the retention job** (`CRON_SECRET`) and **exact webhook signature matching** (`WEBHOOK_URL`).
+
+### ⚠️ Still requires you (cannot be done in code)
+1. **Rotate the Twilio Auth Token + Supabase service-role key** (shared in plaintext during setup). — High
+2. **Disable public sign-ups in Supabase Auth** (`disable_signup` is currently false; only allow-listed admins need accounts). — Medium
+3. **Enable the registrar lock** on the domain at domains.co.za (status is `ok`, not `clientTransferProhibited`) to prevent domain hijack; optionally enable **DNSSEC**. — Low/Med
+4. **When email is set up**, add **SPF, DKIM and DMARC** records to stop spoofing/phishing from your domain. — Med (future)
+5. **Attorney review** of the legal pages + register the entity / Information Officer with the Information Regulator. — Ongoing
+
 ## Recommended order of remediation
 
 1. **Lock down the database (Finding #1)** — highest impact, do first.
