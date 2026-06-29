@@ -304,7 +304,7 @@
       <div class="wrap">
         <div class="stats reveal">
           <div class="stat"><div class="num grad-text">5 min</div><div class="lbl">To your career profile</div></div>
-          <div class="stat"><div class="num grad-text">40+</div><div class="lbl">Careers matched</div></div>
+          <div class="stat"><div class="num grad-text">30</div><div class="lbl">Questions, all tappable</div></div>
           <div class="stat"><div class="num grad-text">R0</div><div class="lbl">Completely free</div></div>
           <div class="stat"><div class="num grad-text">100%</div><div class="lbl">On WhatsApp</div></div>
         </div>
@@ -453,8 +453,10 @@
       // ---- WhatsApp deep-link config ----
       // Set this to your WhatsApp number (international format, no +).
       // For the Twilio Sandbox, learners must first send the join phrase — set PREFILL to "join your-code".
-      var WHATSAPP_NUMBER = "16015339834";
-      var PREFILL = "Hi"; // e.g. "join brave-tiger" while on the Twilio sandbox
+      // Twilio WhatsApp SANDBOX number. While on the sandbox, a learner must
+      // first send the join phrase, so PREFILL is set to "join <your-code>".
+      var WHATSAPP_NUMBER = "14155238886";
+      var PREFILL = "join mark-tail"; // Twilio sandbox join phrase (temporary, until a production number)
       var waLink = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(PREFILL);
       document.querySelectorAll(".wa-cta").forEach(function (a) { a.setAttribute("href", waLink); });
 
