@@ -1,195 +1,127 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { useState } from "react";
-import { Filter, ArrowRight } from "lucide-react";
 
-interface Lead {
-  id: string;
-  student_id: string;
-  college_id: string;
-  status: "new" | "contacted" | "interested" | "enrolled" | "rejected";
-  notes: string;
-  created_at: string;
-}
-
-interface Student {
-  id: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  phone_number: string;
-}
-
-interface College {
-  id: string;
-  name: string;
+interface Session {
+  phone: string;
+  step: string;
+  data: Record<string, any>;
+  q: number;
+  responses: number[];
+  updated_at: string;
+  report_token: string | null;
 }
 
 export default function LeadsPage() {
-  const queryClient = useQueryClient();
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [search, setSearch] = useState("");
 
-  const { data: leads = [], isLoading: leadsLoading } = useQuery({
-    queryKey: ["leads"],
+  const { data: sessions = [], isLoading } = useQuery({
+    queryKey: ["sessions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("leads")
+        .from("whatsapp_sessions")
         .select("*")
-        .order("created_at", { ascending: false });
+        .eq("data->>share_consent", "true")
+        .order("updated_at", { ascending: false });
       if (error) throw error;
-      return (data as Lead[]) || [];
+      return (data as Session[]) || [];
     },
   });
 
-  const { data: students = [] } = useQuery({
-    queryKey: ["students"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("students").select("*");
-      if (error) throw error;
-      return (data as Student[]) || [];
-    },
+  const filtered = sessions.filter((s) => {
+    const term = search.toLowerCase();
+    return (
+      !term ||
+      s.data?.name?.toLowerCase().includes(term) ||
+      s.phone.includes(term) ||
+      s.data?.school?.toLowerCase().includes(term)
+    );
   });
-
-  const { data: colleges = [] } = useQuery({
-    queryKey: ["colleges"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("colleges").select("*");
-      if (error) throw error;
-      return (data as College[]) || [];
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ leadId, newStatus }: { leadId: string; newStatus: string }) => {
-      const { error } = await supabase
-        .from("leads")
-        .update({ status: newStatus })
-        .eq("id", leadId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["leads"] });
-    },
-  });
-
-  const filteredLeads =
-    selectedStatus === "all" ? leads : leads.filter((l) => l.status === selectedStatus);
-
-  const statusConfig: Record<string, { color: string; bgColor: string; icon: string }> = {
-    new: { color: "text-brand", bgColor: "bg-brand/10", icon: "🆕" },
-    contacted: { color: "text-purple-700", bgColor: "bg-purple-100", icon: "📞" },
-    interested: { color: "text-orange-700", bgColor: "bg-orange-100", icon: "👀" },
-    enrolled: { color: "text-green-700", bgColor: "bg-green-100", icon: "✅" },
-    rejected: { color: "text-red-700", bgColor: "bg-red-100", icon: "❌" },
-  };
-
-  const getStudentName = (studentId: string) => {
-    const student = students.find((s) => s.id === studentId);
-    return student
-      ? `${student.first_name || ""} ${student.last_name || ""}`.trim() || "Unknown"
-      : "Unknown";
-  };
-
-  const getCollegeName = (collegeId: string) => {
-    const college = colleges.find((c) => c.id === collegeId);
-    return college?.name || "Unknown";
-  };
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-navy mb-2">Qualified Leads</h1>
-        <p className="text-gray-600">Track and manage student enrollments</p>
+        <p className="text-gray-600">Learners who consented to be contacted by institutions</p>
       </div>
 
-      {/* Filter */}
-      <div className="mb-6 flex gap-3">
-        <div className="flex gap-2 flex-wrap">
-          {["all", "new", "contacted", "interested", "enrolled", "rejected"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setSelectedStatus(status)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                selectedStatus === status
-                  ? "bg-brand text-white shadow-md"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {status === "all" ? "All Leads" : status.charAt(0).toUpperCase() + status.slice(1)}
-            </button>
-          ))}
-        </div>
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by name, phone or school…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
+        />
       </div>
 
-      {leadsLoading && <div className="text-center py-12 text-gray-500">Loading leads...</div>}
+      {isLoading && <div className="text-center py-12 text-gray-500">Loading leads…</div>}
 
-      {!leadsLoading && filteredLeads.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-600 mb-2">No leads found</p>
-          <p className="text-sm text-gray-500">Students who complete assessments will appear here</p>
+          <p className="text-gray-600 mb-2">No qualified leads yet</p>
+          <p className="text-sm text-gray-500">Learners who opt in to share their results will appear here</p>
         </div>
       )}
 
-      {filteredLeads.length > 0 && (
+      {filtered.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Student</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">College</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Update Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Created</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Phone</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Grade</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">School</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Suburb</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Age</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Assessment</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Consented</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredLeads.map((lead) => {
-                  const config = statusConfig[lead.status];
-                  return (
-                    <tr key={lead.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-navy">{getStudentName(lead.student_id)}</span>
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">{getCollegeName(lead.college_id)}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${config.bgColor} ${config.color}`}>
-                          {config.icon} {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={lead.status}
-                          onChange={(e) =>
-                            updateMutation.mutate({
-                              leadId: lead.id,
-                              newStatus: e.target.value,
-                            })
-                          }
-                          disabled={updateMutation.isPending}
-                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand focus:border-transparent outline-none cursor-pointer disabled:opacity-50"
-                        >
-                          <option value="new">New</option>
-                          <option value="contacted">Contacted</option>
-                          <option value="interested">Interested</option>
-                          <option value="enrolled">Enrolled</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4 text-gray-500 text-sm">
-                        {new Date(lead.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filtered.map((s) => (
+                  <tr key={s.phone} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                          <span className="text-sm font-semibold text-green-700">
+                            {(s.data?.name?.[0] || "?").toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="font-medium text-navy">{s.data?.name || "—"}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">{s.phone.replace("whatsapp:", "")}</td>
+                    <td className="px-6 py-4">
+                      <span className="inline-block px-3 py-1 bg-brand/10 text-brand rounded-full text-sm font-medium">
+                        {s.data?.grade ? `Grade ${s.data.grade}` : "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{s.data?.school || "—"}</td>
+                    <td className="px-6 py-4 text-gray-600">{s.data?.suburb || "—"}</td>
+                    <td className="px-6 py-4 text-gray-600">{s.data?.age || "—"}</td>
+                    <td className="px-6 py-4">
+                      {s.report_token ? (
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">✅ Complete</span>
+                      ) : (
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold">⏳ In Progress</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 text-sm">
+                      {s.data?.share_consent_at
+                        ? new Date(s.data.share_consent_at).toLocaleDateString()
+                        : new Date(s.updated_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-
-          {/* Footer */}
           <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
             <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{filteredLeads.length}</span> leads
+              <span className="font-semibold">{filtered.length}</span> qualified lead{filtered.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
