@@ -76,7 +76,7 @@ export default function LeadsPage() {
     selectedStatus === "all" ? leads : leads.filter((l) => l.status === selectedStatus);
 
   const statusConfig: Record<string, { color: string; bgColor: string; icon: string }> = {
-    new: { color: "text-blue-700", bgColor: "bg-blue-100", icon: "🆕" },
+    new: { color: "text-brand", bgColor: "bg-brand/10", icon: "🆕" },
     contacted: { color: "text-purple-700", bgColor: "bg-purple-100", icon: "📞" },
     interested: { color: "text-orange-700", bgColor: "bg-orange-100", icon: "👀" },
     enrolled: { color: "text-green-700", bgColor: "bg-green-100", icon: "✅" },
@@ -98,7 +98,7 @@ export default function LeadsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Qualified Leads</h1>
+        <h1 className="text-3xl font-bold text-navy mb-2">Qualified Leads</h1>
         <p className="text-gray-600">Track and manage student enrollments</p>
       </div>
 
@@ -111,7 +111,7 @@ export default function LeadsPage() {
               onClick={() => setSelectedStatus(status)}
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 selectedStatus === status
-                  ? "bg-blue-600 text-white shadow-md"
+                  ? "bg-brand text-white shadow-md"
                   : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -131,16 +131,16 @@ export default function LeadsPage() {
       )}
 
       {filteredLeads.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Student</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">College</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Update Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Student</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">College</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Update Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,7 +149,7 @@ export default function LeadsPage() {
                   return (
                     <tr key={lead.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
                       <td className="px-6 py-4">
-                        <span className="font-medium text-gray-900">{getStudentName(lead.student_id)}</span>
+                        <span className="font-medium text-navy">{getStudentName(lead.student_id)}</span>
                       </td>
                       <td className="px-6 py-4 text-gray-600">{getCollegeName(lead.college_id)}</td>
                       <td className="px-6 py-4">
@@ -167,7 +167,7 @@ export default function LeadsPage() {
                             })
                           }
                           disabled={updateMutation.isPending}
-                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none cursor-pointer disabled:opacity-50"
+                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand focus:border-transparent outline-none cursor-pointer disabled:opacity-50"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>

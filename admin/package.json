@@ -1,7 +1,7 @@
 {
-  "name": "pathfinder-admin",
+  "name": "vula-admin",
   "version": "1.0.0",
-  "description": "Pathfinder admin dashboard",
+  "description": "Vula admin dashboard",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -40,7 +40,7 @@ export default function StudentsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Students</h1>
+        <h1 className="text-3xl font-bold text-navy mb-2">Students</h1>
         <p className="text-gray-600">Manage and track student assessments</p>
       </div>
 
@@ -53,7 +53,7 @@ export default function StudentsPage() {
             placeholder="Search by name, phone, or school..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
           />
         </div>
         <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2 font-medium text-gray-700">
@@ -74,17 +74,17 @@ export default function StudentsPage() {
       )}
 
       {filteredStudents.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Phone</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Grade</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">School</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Joined</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Phone</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Grade</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">School</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Email</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Joined</th>
                 </tr>
               </thead>
               <tbody>
@@ -92,12 +92,12 @@ export default function StudentsPage() {
                   <tr key={student.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-blue-700">
+                        <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
+                          <span className="text-sm font-semibold text-brand">
                             {(student.first_name?.[0] || student.last_name?.[0] || "?").toUpperCase()}
                           </span>
                         </div>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-navy">
                           {student.first_name || student.last_name
                             ? `${student.first_name || ""} ${student.last_name || ""}`.trim()
                             : "N/A"}
@@ -106,7 +106,7 @@ export default function StudentsPage() {
                     </td>
                     <td className="px-6 py-4 text-gray-600">{student.phone_number}</td>
                     <td className="px-6 py-4">
-                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                      <span className="inline-block px-3 py-1 bg-brand/10 text-brand rounded-full text-sm font-medium">
                         {student.grade || "N/A"}
                       </span>
                     </td>

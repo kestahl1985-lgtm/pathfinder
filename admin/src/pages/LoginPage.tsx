@@ -15,7 +15,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       await signIn(email, password);
       navigate("/");
@@ -27,76 +26,67 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-      </div>
+    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-deepnavy via-navy to-deepnavy px-4 overflow-hidden">
+      <div className="absolute -top-40 -right-32 w-96 h-96 rounded-full bg-brand/30 blur-3xl" />
+      <div className="absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-brand2/20 blur-3xl" />
 
-      <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
-          {/* Logo */}
-          <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
-              Vula
-            </h1>
-            <p className="text-gray-600">Admin Dashboard</p>
+      <div className="relative w-full max-w-sm">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand2 to-brand grid place-items-center shadow-xl shadow-brand/40 mb-4">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="18.4" r="1.5" fill="#fff" />
+              <path d="M12 18 C10.8 14 9 10.6 8.2 7.8" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" />
+              <circle cx="8.2" cy="7" r="1.5" fill="#fff" />
+              <path d="M12 18 C13.2 14 15 10.6 15.8 7.8" stroke="#b6f400" strokeWidth="1.9" strokeLinecap="round" />
+              <circle cx="15.8" cy="6.8" r="2" fill="#b6f400" />
+            </svg>
           </div>
+          <h1 className="font-heading font-extrabold text-3xl text-white">vula</h1>
+          <p className="text-muted text-sm mt-1">Admin dashboard</p>
+        </div>
 
-          {/* Error */}
+        <div className="bg-white/[0.04] backdrop-blur border border-white/10 rounded-2xl p-7 shadow-2xl">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="mb-5 flex gap-2.5 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-200">{error}</p>
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Email Address
-              </label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wide">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@pathfinder.local"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                placeholder="you@vulacareers.co.za"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/40 transition"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Password
-              </label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wide">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/40 transition"
               />
             </div>
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl font-heading font-bold text-white bg-gradient-to-r from-brand2 to-brand hover:shadow-lg hover:shadow-brand/40 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader className="w-5 h-5 animate-spin" />}
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Signing in…" : "Sign in"}
             </button>
           </form>
-
-          {/* Footer */}
-          <p className="text-center text-sm text-gray-600">
-            Secure admin access to Vula
-          </p>
         </div>
+        <p className="text-center text-xs text-slate-500 mt-6">Secure access · Vula · vulacareers.co.za</p>
       </div>
     </div>
   );
