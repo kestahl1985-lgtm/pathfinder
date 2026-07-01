@@ -18,7 +18,6 @@ const PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const SID_YESNO = process.env.CONTENT_SID_YESNO || "HX94ea41518e35dd7bd5c666b8b2f968d6";
 const SID_GRADE = process.env.CONTENT_SID_GRADE || "HX8c9397cd6d8cc5c9cac8c478e51768ab";
 const SID_CONSENT = process.env.CONTENT_SID_CONSENT || "HX389c1fc2e0a23ff51e7145227d8b8287";
-const SID_SHARE = process.env.CONTENT_SID_SHARE || "HX77d094aff572d25bd61676055a75e7ef";
 
 // Public URL of the privacy policy (update when the site is on its own domain)
 const PRIVACY_URL = process.env.PRIVACY_URL || "https://vulacareers.co.za/privacy.html";
@@ -81,6 +80,7 @@ function rateLimited(key) {
 // ===================== Assessment =====================
 // Career data + trait names are shared with the PDF report (api/report.js).
 const { TRAIT_NAMES, CAREERS, careerById } = require("../lib/careers.js");
+const { normalizeCity } = require("../lib/cities.js");
 
 // 30 questions, 5 per trait, interleaved. { t: trait, q: text }
 const QUESTIONS = [
@@ -180,7 +180,7 @@ function careerDetailText(s, c) {
 }
 
 // ===================== State machine =====================
-function advance(s, input, rawBody) {
+async function advance(s, input, rawBody) {
   if (s.step === "consent") {
     const v = (input || "").toLowerCase();
     if (v === "more") {
@@ -209,13 +209,18 @@ function advance(s, input, rawBody) {
     const age = parseInt(input, 10);
     if (isNaN(age) || age < 12 || age > 25) return [{ type: "text", text: "Please reply with a valid age between 12 and 25." }];
     s.data.age = age;
+    s.step = "city";
+    return [{ type: "text", text: "Thanks! 🎂\n\nWhich city or town are you closest to? (e.g. Cape Town, Johannesburg, Durban)" }];
+  }
+  if (s.step === "city") {
+    s.data.city = normalizeCity(rawBody);
     s.step = "suburb";
-    return [{ type: "text", text: "Thanks! 🎂\n\nWhich suburb or area do you live in?" }];
+    return [{ type: "text", text: "Got it! 📍\n\nAnd which suburb or area do you live in?" }];
   }
   if (s.step === "suburb") {
     s.data.suburb = rawBody.slice(0, 40);
     s.step = "grade";
-    return [{ type: "grade", text: `📍 ${rawBody} — noted.\n\nWhat grade are you in?` }];
+    return [{ type: "grade", text: `${rawBody} — noted.\n\nWhat grade are you in?` }];
   }
   if (s.step === "grade") {
     const grade = parseInt(input, 10);
@@ -247,7 +252,7 @@ function advance(s, input, rawBody) {
     // Finished — compute matches, mint a report token, present results
     computeMatches(s);
     if (!s.report_token) s.report_token = crypto.randomBytes(10).toString("hex");
-    s.step = "share_consent";
+    s.step = "exploring";
     return [
       {
         type: "text",
@@ -256,26 +261,9 @@ function advance(s, input, rawBody) {
           `${gradeTip(s.data.grade)}\n\nHere's what your profile reveals 👇`,
       },
       { type: "text", text: resultsListText(s) },
-      shareQuestionPiece(s.data.name),
+      reportPiece(s),
+      { type: "text", text: "Now explore your matches 👇\n\n" + menuText(s) },
     ];
-  }
-
-  if (s.step === "share_consent") {
-    const v = (input || "").toLowerCase();
-    if (v === "yes" || v === "no") {
-      s.data.share_consent = v === "yes";
-      s.data.share_consent_at = new Date().toISOString();
-      s.step = "exploring";
-      const ack = v === "yes"
-        ? "🎉 Great! We'll match you with relevant colleges and bursaries, and they may reach out with opportunities. You can opt out anytime by replying *STOP*."
-        : "👍 No problem — your details stay private and won't be shared. You can change your mind anytime.";
-      return [
-        { type: "text", text: ack },
-        reportPiece(s),
-        { type: "text", text: "Now explore your matches 👇\n\n" + menuText(s) },
-      ];
-    }
-    return [shareQuestionPiece(s.data.name)];
   }
 
   if (s.step === "results" || s.step === "exploring") {
@@ -284,8 +272,15 @@ function advance(s, input, rawBody) {
     if (n >= 1 && n <= ids.length) {
       s.step = "exploring";
       const c = careerById(ids[n - 1]);
+      const sponsor = await findSponsorMatch(s.data.city, c.traits);
+      let detail = careerDetailText(s, c);
+      if (sponsor) {
+        detail +=
+          `\n\n🏫 *Sponsored option near you:*\n*${sponsor.college.name}* — ${sponsor.course.name}` +
+          (sponsor.college.website ? `\n${sponsor.college.website}` : "");
+      }
       return [
-        { type: "text", text: careerDetailText(s, c) },
+        { type: "text", text: detail },
         { type: "text", text: menuText(s) },
       ];
     }
@@ -306,8 +301,9 @@ function welcomePiece() {
     text:
       "👋 Welcome to *Vula* — your free career guide on WhatsApp!\n\n" +
       "Before we start, a quick note on your privacy:\n" +
-      "• We'll ask a few details (name, school, age, area, grade) to give you accurate guidance.\n" +
+      "• We'll ask a few details (name, school, age, city, grade) to give you accurate guidance.\n" +
       "• Your info is kept private and used only to help you.\n" +
+      "• We may show you sponsor college/bursary options that match your results — reaching out to them is always your choice.\n" +
       "• If you're under 18, please make sure a *parent or guardian* is happy for you to continue.\n\n" +
       `Read how we protect your info: ${PRIVACY_URL}\n\n` +
       "Tap *I agree* to begin. 👇",
@@ -316,23 +312,12 @@ function welcomePiece() {
 
 const MORE_INFO_TEXT =
   "🔒 *How Vula uses your info*\n\n" +
-  "• We only collect what's needed to guide you: name, school, age, area, grade and your answers.\n" +
+  "• We only collect what's needed to guide you: name, school, age, city, grade and your answers.\n" +
   "• We never ask for ID numbers, passwords or banking details.\n" +
-  "• We *only* share your details with colleges or bursary programmes if you choose to be connected — and you can opt out anytime.\n" +
+  "• Vula is funded by sponsoring colleges — we may show you their courses if they match your results, but we *never* share your personal details with them. Reaching out is always your choice.\n" +
   "• You can reply *DELETE* at any time to remove your information.\n\n" +
   `Full policy: ${PRIVACY_URL}\n\n` +
   "Tap *I agree* to continue. 👇";
-
-function shareQuestionPiece(name) {
-  return {
-    type: "share",
-    text:
-      `📨 One last thing, ${name}:\n\n` +
-      "Would you like Vula to connect you with colleges, universities and bursary programmes that match your results? " +
-      "They may contact you about opportunities.\n\n" +
-      "You can say no — you'll still keep all your results.",
-  };
-}
 
 // Sends the personalised PDF career report as a WhatsApp document.
 function reportPiece(s) {
@@ -390,6 +375,31 @@ async function saveSession(s) {
   });
 }
 
+// Finds the best-matching active sponsor course for a career's traits,
+// scoped to the learner's city (or shown nationally when a college has no
+// city set). Scored the same way computeMatches ranks careers.
+async function findSponsorMatch(city, careerTraits) {
+  if (!hasSupabase()) return null;
+  const cityFilter = city ? `,city.eq.${encodeURIComponent(city)}` : "";
+  const r = await supabaseRequest(
+    "GET",
+    `colleges?select=*,courses(*)&active=eq.true&or=(city.is.null,city.eq.Other${cityFilter})`
+  );
+  if (!r.ok || !Array.isArray(r.json)) return null;
+
+  const [primary, secondary] = careerTraits;
+  let best = null;
+  for (const college of r.json) {
+    for (const course of college.courses || []) {
+      if (!course.active) continue;
+      const m = course.riasec_match || {};
+      const score = (m[primary] || 0) * 2 + (secondary ? m[secondary] || 0 : 0);
+      if (score > 0 && (!best || score > best.score)) best = { score, college, course };
+    }
+  }
+  return best;
+}
+
 async function deleteSession(phone) {
   if (!hasSupabase()) { delete memory[phone]; return; }
   await supabaseRequest("DELETE", `whatsapp_sessions?phone=eq.${encodeURIComponent(phone)}`);
@@ -424,7 +434,6 @@ function sendPiece(to, piece) {
   if (piece.type === "yesno") return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "grade") return twilioPost({ ...base, ContentSid: SID_GRADE, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "consent") return twilioPost({ ...base, ContentSid: SID_CONSENT, ContentVariables: JSON.stringify({ 1: piece.text }) });
-  if (piece.type === "share") return twilioPost({ ...base, ContentSid: SID_SHARE, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "media") return twilioPost({ ...base, Body: piece.text, MediaUrl: piece.mediaUrl });
   return twilioPost({ ...base, Body: piece.text });
 }
@@ -435,7 +444,6 @@ function renderFallback(pieces) {
     if (p.type === "yesno") return `${p.text}\n\nReply: 0 = No   1 = Maybe   2 = Yes`;
     if (p.type === "grade") return `${p.text}\n\nReply: 10, 11 or 12`;
     if (p.type === "consent") return `${p.text}\n\nReply AGREE to continue, or MORE for more info.`;
-    if (p.type === "share") return `${p.text}\n\nReply YES or NO.`;
     if (p.type === "media") return `${p.text}\n\n${p.mediaUrl}`;
     return p.text;
   }).join("\n\n");
@@ -500,7 +508,7 @@ module.exports = async (req, res) => {
     session = { phone: from, step: "consent", data: {}, q: 0, responses: [] };
     pieces = [welcomePiece()];
   } else {
-    pieces = advance(session, input, rawBody);
+    pieces = await advance(session, input, rawBody);
   }
   await saveSession(session);
   return await respond(res, from, pieces);

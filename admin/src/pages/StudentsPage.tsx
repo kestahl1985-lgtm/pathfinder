@@ -36,6 +36,7 @@ export default function StudentsPage() {
       s.phone.includes(term) ||
       s.data?.name?.toLowerCase().includes(term) ||
       s.data?.school?.toLowerCase().includes(term) ||
+      s.data?.city?.toLowerCase().includes(term) ||
       s.data?.suburb?.toLowerCase().includes(term)
     );
   });
@@ -52,7 +53,7 @@ export default function StudentsPage() {
           <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name, phone, school or suburb…"
+            placeholder="Search by name, phone, school, city or suburb…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
@@ -81,10 +82,10 @@ export default function StudentsPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Grade</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">School</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">City</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Suburb</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Age</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Consented to Share</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Last Active</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy"></th>
                 </tr>
@@ -109,6 +110,7 @@ export default function StudentsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.school || "—"}</td>
+                    <td className="px-6 py-4 text-gray-600">{s.data?.city || "—"}</td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.suburb || "—"}</td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.age || "—"}</td>
                     <td className="px-6 py-4">
@@ -116,15 +118,6 @@ export default function StudentsPage() {
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">✅ Complete</span>
                       ) : (
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold">⏳ Q{s.q} / 30</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {s.data?.share_consent === true ? (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">✅ Yes</span>
-                      ) : s.data?.share_consent === false ? (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold">❌ No</span>
-                      ) : (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-semibold">— Pending</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-gray-500 text-sm">

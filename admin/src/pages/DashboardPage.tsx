@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import { Users, CheckCircle, Target, TrendingUp } from "lucide-react";
+import { Users, CheckCircle, GraduationCap, TrendingUp } from "lucide-react";
 
 interface Session {
   phone: string;
@@ -25,14 +25,25 @@ export default function DashboardPage() {
     },
   });
 
+  const { data: sponsorCount = 0 } = useQuery({
+    queryKey: ["colleges", "active-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("colleges")
+        .select("*", { count: "exact", head: true })
+        .eq("active", true);
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
   const completed = sessions.filter((s) => s.report_token);
-  const leads = sessions.filter((s) => s.data?.share_consent === true);
   const conversion = sessions.length > 0 ? Math.round((completed.length / sessions.length) * 100) : 0;
 
   const stats = [
     { label: "Total Learners", value: sessions.length, icon: Users, ring: "from-brand2/20 to-brand2/5", fg: "text-brand2" },
     { label: "Completed Assessments", value: completed.length, icon: CheckCircle, ring: "from-lime/25 to-lime/5", fg: "text-[#6f9e00]" },
-    { label: "Qualified Leads", value: leads.length, icon: Target, ring: "from-brand/20 to-brand/5", fg: "text-brand" },
+    { label: "Active Sponsors", value: sponsorCount, icon: GraduationCap, ring: "from-brand/20 to-brand/5", fg: "text-brand" },
     { label: "Conversion", value: `${conversion}%`, icon: TrendingUp, ring: "from-[#25d366]/20 to-[#25d366]/5", fg: "text-[#1aa34a]" },
   ];
 

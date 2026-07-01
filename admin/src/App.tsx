@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "./lib/auth";
 import Layout from "./components/Layout";
 import DashboardPage from "./pages/DashboardPage";
 import StudentsPage from "./pages/StudentsPage";
-import LeadsPage from "./pages/LeadsPage";
+import SponsorsPage from "./pages/SponsorsPage";
 import WaitlistPage from "./pages/WaitlistPage";
 import BackendPage from "./pages/BackendPage";
 import LoginPage from "./pages/LoginPage";
@@ -36,7 +36,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/students" element={<StudentsPage />} />
-        <Route path="/leads" element={<LeadsPage />} />
+        <Route path="/sponsors" element={<SponsorsPage />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
         <Route path="/backend" element={<BackendPage />} />
         <Route path="*" element={<Navigate to="/" />} />
