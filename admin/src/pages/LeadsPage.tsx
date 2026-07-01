@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { useState } from "react";
+import { MessageCircle } from "lucide-react";
+import MessageModal from "../components/MessageModal";
 
 interface Session {
   phone: string;
@@ -14,6 +16,7 @@ interface Session {
 
 export default function LeadsPage() {
   const [search, setSearch] = useState("");
+  const [messaging, setMessaging] = useState<{ phone: string; name?: string } | null>(null);
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["sessions"],
@@ -78,6 +81,7 @@ export default function LeadsPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Age</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Assessment</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Consented</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy"></th>
                 </tr>
               </thead>
               <tbody>
@@ -114,6 +118,15 @@ export default function LeadsPage() {
                         ? new Date(s.data.share_consent_at).toLocaleDateString()
                         : new Date(s.updated_at).toLocaleDateString()}
                     </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => setMessaging({ phone: s.phone, name: s.data?.name })}
+                        title="Send WhatsApp message"
+                        className="p-2 rounded-lg text-brand hover:bg-brand/10 transition"
+                      >
+                        <MessageCircle size={18} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -125,6 +138,10 @@ export default function LeadsPage() {
             </p>
           </div>
         </div>
+      )}
+
+      {messaging && (
+        <MessageModal phone={messaging.phone} name={messaging.name} onClose={() => setMessaging(null)} />
       )}
     </div>
   );
