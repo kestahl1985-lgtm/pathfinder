@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import DashboardPage from "./pages/DashboardPage";
 import StudentsPage from "./pages/StudentsPage";
 import LeadsPage from "./pages/LeadsPage";
+import WaitlistPage from "./pages/WaitlistPage";
 import BackendPage from "./pages/BackendPage";
 import LoginPage from "./pages/LoginPage";
 
@@ -36,6 +37,7 @@ function AppRoutes() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/students" element={<StudentsPage />} />
         <Route path="/leads" element={<LeadsPage />} />
+        <Route path="/waitlist" element={<WaitlistPage />} />
         <Route path="/backend" element={<BackendPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
