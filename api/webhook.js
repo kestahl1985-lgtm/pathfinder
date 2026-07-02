@@ -343,6 +343,7 @@ function supabaseRequest(method, path, body) {
       "Content-Type": "application/json",
     };
     if (method === "POST") headers["Prefer"] = "resolution=merge-duplicates,return=minimal";
+    if (method === "PATCH") headers["Prefer"] = "return=representation";
     if (payload) headers["Content-Length"] = Buffer.byteLength(payload);
     const req = https.request({ hostname: url.hostname, path: `/rest/v1/${path}`, method, headers }, (res) => {
       let data = "";
@@ -363,16 +364,35 @@ async function loadSession(phone) {
   const r = await supabaseRequest("GET", `whatsapp_sessions?phone=eq.${encodeURIComponent(phone)}&limit=1`);
   if (r.ok && Array.isArray(r.json) && r.json.length) {
     const row = r.json[0];
-    return { phone, step: row.step, data: row.data || {}, q: row.q || 0, responses: row.responses || [], report_token: row.report_token || null };
+    return { phone, step: row.step, data: row.data || {}, q: row.q || 0, responses: row.responses || [], report_token: row.report_token || null, version: row.version || 1 };
   }
   return null;
 }
 
-async function saveSession(s) {
-  if (!hasSupabase()) { memory[s.phone] = s; return; }
-  await supabaseRequest("POST", "whatsapp_sessions", {
-    phone: s.phone, step: s.step, data: s.data, q: s.q, responses: s.responses, report_token: s.report_token || null, updated_at: new Date().toISOString(),
-  });
+// Saves the session. For a session that was freshly created this turn (no
+// version yet) this is a plain insert. For a session loaded from the DB,
+// this does an optimistic-concurrency update guarded on the version we
+// loaded — if another request for the same phone (e.g. a Twilio retry
+// racing the original) already saved a newer version, this update matches
+// zero rows and we report the loss so the caller can avoid sending a
+// duplicate reply. Returns true if this save "won".
+async function saveSession(s, { isNew } = {}) {
+  if (!hasSupabase()) { memory[s.phone] = s; return true; }
+  const fields = { phone: s.phone, step: s.step, data: s.data, q: s.q, responses: s.responses, report_token: s.report_token || null, updated_at: new Date().toISOString() };
+
+  if (isNew) {
+    const r = await supabaseRequest("POST", "whatsapp_sessions", { ...fields, version: 1 });
+    return r.ok;
+  }
+
+  const prevVersion = s.version || 1;
+  s.version = prevVersion + 1;
+  const r = await supabaseRequest(
+    "PATCH",
+    `whatsapp_sessions?phone=eq.${encodeURIComponent(s.phone)}&version=eq.${prevVersion}&select=phone`,
+    { ...fields, version: s.version }
+  );
+  return r.ok && Array.isArray(r.json) && r.json.length > 0;
 }
 
 // Finds the best-matching active sponsor course for a career's traits,
@@ -474,6 +494,7 @@ module.exports = async (req, res) => {
   const rawBody = (body.Body || "").trim();
   const buttonPayload = (body.ButtonPayload || "").trim();
   const input = buttonPayload || rawBody;
+  const messageSid = body.MessageSid || "";
 
   // --- Rate limit per sender (defence in depth) ---
   if (from && rateLimited(from)) {
@@ -503,22 +524,52 @@ module.exports = async (req, res) => {
   if (cmd === "RESTART") await deleteSession(from);
 
   let session = await loadSession(from);
+
+  // Twilio retries a webhook it didn't get a fast enough response to. If
+  // this exact message was already processed (same MessageSid recorded on
+  // the session), don't replay the state machine — just ack quietly so we
+  // don't double-count an answer or double-send messages.
+  if (session && messageSid && session.data._last_message_sid === messageSid) {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/xml");
+    res.end(emptyTwiml());
+    return;
+  }
+
+  const isNew = !session;
   let pieces;
-  if (!session) {
+  if (isNew) {
     session = { phone: from, step: "consent", data: {}, q: 0, responses: [] };
     pieces = [welcomePiece()];
   } else {
     pieces = await advance(session, input, rawBody);
   }
-  await saveSession(session);
+  if (messageSid) session.data._last_message_sid = messageSid;
+
+  const saved = await saveSession(session, { isNew });
+  if (!saved) {
+    // Lost a race to a concurrent request for the same phone (e.g. a retry
+    // landing alongside the original) — the other request's save won and
+    // will have sent its own reply, so don't send a duplicate one here.
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/xml");
+    res.end(emptyTwiml());
+    return;
+  }
   return await respond(res, from, pieces);
 };
 
 // Sends pieces via Twilio (buttons), or replies with plain-text TwiML fallback.
+// Pieces are sent in parallel rather than one-at-a-time so a multi-message
+// reply (e.g. results + report + menu) doesn't stack up latency and risk
+// missing Twilio's webhook response window. WhatsApp delivery order across
+// independent API calls sent milliseconds apart isn't strictly guaranteed,
+// but in practice arrives in submission order; this is a deliberate
+// latency/ordering trade-off.
 async function respond(res, from, pieces) {
   if (hasTwilio()) {
     try {
-      for (const piece of pieces) await sendPiece(from, piece);
+      await Promise.all(pieces.map((piece) => sendPiece(from, piece)));
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/xml");
       res.end(emptyTwiml());
