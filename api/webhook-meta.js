@@ -18,13 +18,14 @@ const crypto = require("crypto");
 
 const {
   advance,
-  welcomePiece,
   reportPiece,
   loadSession,
   saveSession,
   deleteSession,
   rateLimited,
+  langOf,
 } = require("../lib/assessment.js");
+const i18n = require("../lib/i18n.js");
 
 const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
 const PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
@@ -79,46 +80,49 @@ function graphPost(payload) {
   });
 }
 
-// Button ids double as the values advance() parses (e.g. "0"/"1"/"2" for
-// yesno, "agree"/"more" for consent) — chosen to match lib/assessment.js's
-// existing parsing exactly, so no change was needed there.
-function buttons(list) {
-  return list.map(([id, title]) => ({ type: "reply", reply: { id, title } }));
+// Button ids are fixed (they're what lib/assessment.js's advance() parses),
+// only the titles are localized — lib/assessment.js attaches piece.buttons
+// as an array of titles in the learner's chosen language, in the same
+// order as the fixed ids below.
+function buttons(ids, titles) {
+  return ids.map((id, i) => ({ type: "reply", reply: { id, title: titles[i] } }));
 }
 
 function sendPiece(to, piece) {
   const base = { messaging_product: "whatsapp", to };
-  if (piece.type === "yesno") {
+  if (piece.type === "language") {
     return graphPost({
       ...base,
       type: "interactive",
       interactive: {
-        type: "button",
-        body: { text: piece.text },
-        action: { buttons: buttons([["0", "No"], ["1", "Maybe"], ["2", "Yes"]]) },
+        type: "list",
+        body: { text: i18n.t(i18n.DEFAULT_LANG, "languageQuestion") },
+        action: {
+          button: i18n.t(i18n.DEFAULT_LANG, "languageListButton"),
+          sections: [{ rows: i18n.LANGUAGES.map((l) => ({ id: l.id, title: l.title })) }],
+        },
       },
+    });
+  }
+  if (piece.type === "yesno") {
+    return graphPost({
+      ...base,
+      type: "interactive",
+      interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(["0", "1", "2"], piece.buttons) } },
     });
   }
   if (piece.type === "grade") {
     return graphPost({
       ...base,
       type: "interactive",
-      interactive: {
-        type: "button",
-        body: { text: piece.text },
-        action: { buttons: buttons([["10", "Grade 10"], ["11", "Grade 11"], ["12", "Grade 12"]]) },
-      },
+      interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(["10", "11", "12"], piece.buttons) } },
     });
   }
   if (piece.type === "consent") {
     return graphPost({
       ...base,
       type: "interactive",
-      interactive: {
-        type: "button",
-        body: { text: piece.text },
-        action: { buttons: buttons([["agree", "I agree"], ["more", "More info"]]) },
-      },
+      interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(["agree", "more"], piece.buttons) } },
     });
   }
   if (piece.type === "media") {
@@ -217,35 +221,34 @@ module.exports = async (req, res) => {
   }
 
   const cmd = rawBody.toUpperCase();
+  let session = await loadSession(from);
+  const cmdLang = session ? langOf(session) : i18n.DEFAULT_LANG;
 
   // POPIA: let users delete their data or stop messages at any time.
   if (cmd === "DELETE") {
     await deleteSession(from);
-    await respond(from, [{ type: "text", text: "🗑️ Done — your information has been deleted from Vula. Reply *Hi* anytime to start fresh." }]);
+    await respond(from, [{ type: "text", text: i18n.t(cmdLang, "deleteConfirm") }]);
     res.statusCode = 200;
     res.end("EVENT_RECEIVED");
     return;
   }
   if (cmd === "STOP") {
-    await respond(from, [{ type: "text", text: "👋 You won't receive more messages from Vula. Reply *Hi* anytime to resume. To delete your info, reply *DELETE*." }]);
+    await respond(from, [{ type: "text", text: i18n.t(cmdLang, "stopConfirm") }]);
     res.statusCode = 200;
     res.end("EVENT_RECEIVED");
     return;
   }
   if (cmd === "REPORT") {
-    const sess = await loadSession(from);
-    if (sess && sess.report_token) {
-      await respond(from, [reportPiece(sess)]);
+    if (session && session.report_token) {
+      await respond(from, [reportPiece(session)]);
     } else {
-      await respond(from, [{ type: "text", text: "You'll get your report once you finish the assessment. Reply *Hi* to begin." }]);
+      await respond(from, [{ type: "text", text: i18n.t(cmdLang, "reportNotReady") }]);
     }
     res.statusCode = 200;
     res.end("EVENT_RECEIVED");
     return;
   }
-  if (cmd === "RESTART") await deleteSession(from);
-
-  let session = await loadSession(from);
+  if (cmd === "RESTART") { await deleteSession(from); session = null; }
 
   // Meta retries a webhook it didn't get a fast enough 200 for. If this
   // exact message was already processed (same message id recorded on the
@@ -260,8 +263,8 @@ module.exports = async (req, res) => {
   const isNew = !session;
   let pieces;
   if (isNew) {
-    session = { phone: from, step: "consent", data: {}, q: 0, responses: [] };
-    pieces = [welcomePiece()];
+    session = { phone: from, step: "language", data: {}, q: 0, responses: [] };
+    pieces = [{ type: "language" }];
   } else {
     pieces = await advance(session, input, rawBody);
   }

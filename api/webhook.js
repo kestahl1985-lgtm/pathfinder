@@ -18,13 +18,13 @@ const crypto = require("crypto");
 
 const {
   advance,
-  welcomePiece,
   reportPiece,
   loadSession,
   saveSession,
   deleteSession,
   rateLimited,
 } = require("../lib/assessment.js");
+const { LANGUAGES } = require("../lib/i18n.js");
 
 // --- Twilio ---
 const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -90,8 +90,18 @@ function twilioPost(params) {
   });
 }
 
+// NOTE: the yesno/grade/consent Content Templates (SID_YESNO etc.) have
+// their button labels baked in at the time they were registered in Twilio's
+// console — only the question/prompt *text* is dynamic via
+// ContentVariables. That means on the Twilio path those three button labels
+// stay in English regardless of the learner's chosen language, even though
+// the surrounding text is localized. Not fixed here since Twilio isn't the
+// long-term path (see api/webhook-meta.js, which builds buttons fresh per
+// send and fully localizes them) — fixing this on Twilio would mean
+// registering 4 language variants of each template in the console.
 function sendPiece(to, piece) {
   const base = { From: `whatsapp:${PHONE_NUMBER}`, To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}` };
+  if (piece.type === "language") return twilioPost({ ...base, Body: languageListText() });
   if (piece.type === "yesno") return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "grade") return twilioPost({ ...base, ContentSid: SID_GRADE, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "consent") return twilioPost({ ...base, ContentSid: SID_CONSENT, ContentVariables: JSON.stringify({ 1: piece.text }) });
@@ -99,9 +109,17 @@ function sendPiece(to, piece) {
   return twilioPost({ ...base, Body: piece.text });
 }
 
+// No Twilio List Picker template is registered for language selection, so
+// this is always sent as a plain numbered list; lib/assessment.js's
+// pickLanguage() accepts the reply as either a number or a language id.
+function languageListText() {
+  return "🌍 Which language would you like to use?\n\n" + LANGUAGES.map((l, i) => `${i + 1}. ${l.title}`).join("\n");
+}
+
 // ===================== Fallback rendering =====================
 function renderFallback(pieces) {
   return pieces.map((p) => {
+    if (p.type === "language") return languageListText();
     if (p.type === "yesno") return `${p.text}\n\nReply: 0 = No   1 = Maybe   2 = Yes`;
     if (p.type === "grade") return `${p.text}\n\nReply: 10, 11 or 12`;
     if (p.type === "consent") return `${p.text}\n\nReply AGREE to continue, or MORE for more info.`;
@@ -180,8 +198,8 @@ module.exports = async (req, res) => {
   const isNew = !session;
   let pieces;
   if (isNew) {
-    session = { phone: from, step: "consent", data: {}, q: 0, responses: [] };
-    pieces = [welcomePiece()];
+    session = { phone: from, step: "language", data: {}, q: 0, responses: [] };
+    pieces = [{ type: "language" }];
   } else {
     pieces = await advance(session, input, rawBody);
   }
