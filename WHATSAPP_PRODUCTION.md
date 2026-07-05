@@ -12,7 +12,7 @@ Moving from the Twilio WhatsApp **sandbox** to a **production** WhatsApp Busines
 - **Twilio** account (already have — SID stored in Vercel env vars, not documented here).
 
 ## Business verification documents (Meta)
-- CIPC registration certificate — Praxys (Pty) Ltd, reg **2026/021440/07**
+- CIPC registration certificate — Vula Career Guide (Pty) Ltd, reg **2026/021440/07**
 - Proof of address: 1 Dorchester Drive, Parklands, 7441
 - Business website: vulacareers.co.za
 - Business email: hello@vulacareers.co.za
