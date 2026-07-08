@@ -5,6 +5,8 @@ import Layout from "./components/Layout";
 import DashboardPage from "./pages/DashboardPage";
 import StudentsPage from "./pages/StudentsPage";
 import SponsorsPage from "./pages/SponsorsPage";
+import SponsorImpactPage from "./pages/SponsorImpactPage";
+import ReengagementPage from "./pages/ReengagementPage";
 import WaitlistPage from "./pages/WaitlistPage";
 import BackendPage from "./pages/BackendPage";
 import LoginPage from "./pages/LoginPage";
@@ -37,6 +39,8 @@ function AppRoutes() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/students" element={<StudentsPage />} />
         <Route path="/sponsors" element={<SponsorsPage />} />
+        <Route path="/sponsor-impact" element={<SponsorImpactPage />} />
+        <Route path="/reengagement" element={<ReengagementPage />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
         <Route path="/backend" element={<BackendPage />} />
         <Route path="*" element={<Navigate to="/" />} />

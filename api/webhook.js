@@ -31,7 +31,6 @@ const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const SID_YESNO = process.env.CONTENT_SID_YESNO || "HX94ea41518e35dd7bd5c666b8b2f968d6";
-const SID_GRADE = process.env.CONTENT_SID_GRADE || "HX8c9397cd6d8cc5c9cac8c478e51768ab";
 const SID_CONSENT = process.env.CONTENT_SID_CONSENT || "HX389c1fc2e0a23ff51e7145227d8b8287";
 
 const hasTwilio = () => Boolean(ACCOUNT_SID && AUTH_TOKEN && PHONE_NUMBER);
@@ -90,20 +89,19 @@ function twilioPost(params) {
   });
 }
 
-// NOTE: the yesno/grade/consent Content Templates (SID_YESNO etc.) have
-// their button labels baked in at the time they were registered in Twilio's
+// NOTE: the yesno/consent Content Templates (SID_YESNO etc.) have their
+// button labels baked in at the time they were registered in Twilio's
 // console — only the question/prompt *text* is dynamic via
-// ContentVariables. That means on the Twilio path those three button labels
-// stay in English regardless of the learner's chosen language, even though
-// the surrounding text is localized. Not fixed here since Twilio isn't the
+// ContentVariables. That means on the Twilio path those button labels stay
+// in English regardless of the learner's chosen language, even though the
+// surrounding text is localized. Not fixed here since Twilio isn't the
 // long-term path (see api/webhook-meta.js, which builds buttons fresh per
 // send and fully localizes them) — fixing this on Twilio would mean
 // registering 4 language variants of each template in the console.
 function sendPiece(to, piece) {
   const base = { From: `whatsapp:${PHONE_NUMBER}`, To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}` };
-  if (piece.type === "language") return twilioPost({ ...base, Body: languageListText() });
+  if (piece.type === "language") return twilioPost({ ...base, Body: languageListText(piece.retry) });
   if (piece.type === "yesno") return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
-  if (piece.type === "grade") return twilioPost({ ...base, ContentSid: SID_GRADE, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "consent") return twilioPost({ ...base, ContentSid: SID_CONSENT, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "media") return twilioPost({ ...base, Body: piece.text, MediaUrl: piece.mediaUrl });
   return twilioPost({ ...base, Body: piece.text });
@@ -112,16 +110,16 @@ function sendPiece(to, piece) {
 // No Twilio List Picker template is registered for language selection, so
 // this is always sent as a plain numbered list; lib/assessment.js's
 // pickLanguage() accepts the reply as either a number or a language id.
-function languageListText() {
-  return "🌍 Which language would you like to use?\n\n" + LANGUAGES.map((l, i) => `${i + 1}. ${l.title}`).join("\n");
+function languageListText(retry) {
+  const header = retry ? "🤔 Sorry, that's not a recognised answer. Which language would you like to use? 🌍" : "🌍 Which language would you like to use?";
+  return header + "\n\n" + LANGUAGES.map((l, i) => `${i + 1}. ${l.title}`).join("\n");
 }
 
 // ===================== Fallback rendering =====================
 function renderFallback(pieces) {
   return pieces.map((p) => {
-    if (p.type === "language") return languageListText();
+    if (p.type === "language") return languageListText(p.retry);
     if (p.type === "yesno") return `${p.text}\n\nReply: 0 = No   1 = Maybe   2 = Yes`;
-    if (p.type === "grade") return `${p.text}\n\nReply: 10, 11 or 12`;
     if (p.type === "consent") return `${p.text}\n\nReply AGREE to continue, or MORE for more info.`;
     if (p.type === "media") return `${p.text}\n\n${p.mediaUrl}`;
     return p.text;
@@ -219,16 +217,14 @@ module.exports = async (req, res) => {
 };
 
 // Sends pieces via Twilio (buttons), or replies with plain-text TwiML fallback.
-// Pieces are sent in parallel rather than one-at-a-time so a multi-message
-// reply (e.g. results + report + menu) doesn't stack up latency and risk
-// missing Twilio's webhook response window. WhatsApp delivery order across
-// independent API calls sent milliseconds apart isn't strictly guaranteed,
-// but in practice arrives in submission order; this is a deliberate
-// latency/ordering trade-off.
+// Pieces are sent one at a time, in order — sending them in parallel let
+// independent API calls race and arrive out of order (e.g. a question
+// appearing before the "let's start the assessment" message that precedes
+// it), which is worse than the small added latency of sending sequentially.
 async function respond(res, from, pieces) {
   if (hasTwilio()) {
     try {
-      await Promise.all(pieces.map((piece) => sendPiece(from, piece)));
+      for (const piece of pieces) await sendPiece(from, piece);
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/xml");
       res.end(emptyTwiml());

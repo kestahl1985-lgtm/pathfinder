@@ -96,7 +96,7 @@ function sendPiece(to, piece) {
       type: "interactive",
       interactive: {
         type: "list",
-        body: { text: i18n.t(i18n.DEFAULT_LANG, "languageQuestion") },
+        body: { text: i18n.t(i18n.DEFAULT_LANG, piece.retry ? "languageQuestionRetry" : "languageQuestion") },
         action: {
           button: i18n.t(i18n.DEFAULT_LANG, "languageListButton"),
           sections: [{ rows: i18n.LANGUAGES.map((l) => ({ id: l.id, title: l.title })) }],
@@ -109,13 +109,6 @@ function sendPiece(to, piece) {
       ...base,
       type: "interactive",
       interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(["0", "1", "2"], piece.buttons) } },
-    });
-  }
-  if (piece.type === "grade") {
-    return graphPost({
-      ...base,
-      type: "interactive",
-      interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(["10", "11", "12"], piece.buttons) } },
     });
   }
   if (piece.type === "consent") {
@@ -135,9 +128,13 @@ function sendPiece(to, piece) {
   return graphPost({ ...base, type: "text", text: { body: piece.text } });
 }
 
+// Pieces are sent one at a time, in order — sending them in parallel let
+// independent API calls race and arrive out of order (e.g. a question
+// appearing before the "let's start the assessment" message that precedes
+// it), which is worse than the small added latency of sending sequentially.
 async function respond(from, pieces) {
   if (hasMeta()) {
-    await Promise.all(pieces.map((piece) => sendPiece(from, piece)));
+    for (const piece of pieces) await sendPiece(from, piece);
   }
 }
 
@@ -189,8 +186,18 @@ module.exports = async (req, res) => {
   const rawBodyBuffer = await readRawBody(req);
 
   // --- Security gate: only accept genuine, signed Meta requests ---
-  if (APP_SECRET && process.env.META_VALIDATION !== "off") {
-    if (!validateMetaSignature(rawBodyBuffer, req.headers["x-hub-signature-256"])) {
+  // Fails CLOSED, not open: if META_APP_SECRET isn't set yet (e.g. Meta
+  // account setup still in progress), reject every POST rather than
+  // process it unvalidated. This endpoint is publicly reachable regardless
+  // of whether Meta itself is actually configured to call it, so accepting
+  // unsigned payloads whenever the secret happens to be missing would let
+  // anyone forge webhook calls (DELETE a real learner's session, create
+  // fake sessions for arbitrary phone numbers) simply by POSTing Meta's
+  // publicly-documented payload shape. There's no legitimate traffic this
+  // could break — Meta can't be sending real webhooks here until
+  // META_APP_SECRET exists anyway.
+  if (process.env.META_VALIDATION !== "off") {
+    if (!APP_SECRET || !validateMetaSignature(rawBodyBuffer, req.headers["x-hub-signature-256"])) {
       res.statusCode = 403;
       res.setHeader("Content-Type", "text/plain");
       res.end("Forbidden");

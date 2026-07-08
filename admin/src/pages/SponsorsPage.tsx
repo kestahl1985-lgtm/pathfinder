@@ -3,18 +3,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, GraduationCap } from "lucide-react";
 
-// Keep in sync with lib/cities.js CITIES.
-const CITIES = [
-  "Cape Town",
-  "Johannesburg",
-  "Pretoria",
-  "Durban",
-  "Gqeberha",
-  "Bloemfontein",
-  "East London",
-  "Polokwane",
-  "Mbombela",
-  "Kimberley",
+// Keep in sync with lib/provinces.js PROVINCES.
+const PROVINCES = [
+  "Eastern Cape",
+  "Free State",
+  "Gauteng",
+  "KwaZulu-Natal",
+  "Limpopo",
+  "Mpumalanga",
+  "Northern Cape",
+  "North West",
+  "Western Cape",
   "Other",
 ];
 
@@ -41,7 +40,7 @@ interface Course {
 interface College {
   id: string;
   name: string;
-  city: string | null;
+  province: string | null;
   location: string | null;
   contact_email: string | null;
   contact_phone: string | null;
@@ -87,7 +86,7 @@ export default function SponsorsPage() {
     setError("");
     const payload = {
       name: c.name?.trim(),
-      city: c.city || null,
+      province: c.province || null,
       location: c.location?.trim() || null,
       contact_email: c.contact_email?.trim() || null,
       contact_phone: c.contact_phone?.trim() || null,
@@ -179,7 +178,7 @@ export default function SponsorsPage() {
                 <div>
                   <div className="font-semibold text-navy">{college.name}</div>
                   <div className="text-sm text-gray-500">
-                    {college.city || "National"} · {(college.courses || []).length} course{(college.courses || []).length !== 1 ? "s" : ""}
+                    {college.province || "National"} · {(college.courses || []).length} course{(college.courses || []).length !== 1 ? "s" : ""}
                     {!college.active && " · inactive"}
                   </div>
                 </div>
@@ -280,13 +279,13 @@ function CollegeModal({ college, onClose, onSave }: { college: Partial<College>;
             className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand"
           />
           <select
-            value={form.city || ""}
-            onChange={(e) => setForm({ ...form, city: e.target.value || null })}
+            value={form.province || ""}
+            onChange={(e) => setForm({ ...form, province: e.target.value || null })}
             className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand"
           >
-            <option value="">National (shown to all cities)</option>
-            {CITIES.filter((c) => c !== "Other").map((c) => (
-              <option key={c} value={c}>{c}</option>
+            <option value="">National (shown to all provinces)</option>
+            {PROVINCES.filter((p) => p !== "Other").map((p) => (
+              <option key={p} value={p}>{p}</option>
             ))}
           </select>
           <input

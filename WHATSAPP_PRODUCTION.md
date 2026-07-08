@@ -53,7 +53,16 @@ Name: `welcome_optin`
 Welcome to Vula 🌟 Free career guidance for South African learners. Reply *START* to begin your assessment, or *INFO* to learn how we protect your privacy.
 ```
 
-> Notes for approval: keep them Utility (not Marketing) where possible — faster approval, no opt-in restrictions. No promotional language, no external URLs in the body, correct {{n}} variable format with samples.
+### 4. Re-engagement check-in (Category: Utility, but see note)
+Name: `grade_progress_nudge` (kept the original name to avoid a code/docs mismatch — no longer grade-specific; wording changed after the onboarding flow dropped the grade question entirely, so there's no grade value left to reference)
+```
+Hi {{1}} 👋 It's been a while! Reply *MENU* to revisit your matched careers on Vula, or *RESTART* to redo the assessment fresh.
+```
+Sample {{1}} = "Thabo"
+
+**Sending is manual, not automatic.** `api/reengage.js` (Vercel Cron, daily) only decides who's *due* for a nudge (~10 months since they finished, capped at 2 nudges ever) and adds them to the `reengagement_queue` table — an admin reviews the queue on the "Re-engagement Schedule" screen and clicks Send (or Skip) per learner, which calls `api/reengage-action.js` to actually deliver this template. See that file's header comment for why this was made manual rather than auto-sent.
+
+> Notes for approval: keep them Utility (not Marketing) where possible — faster approval, no opt-in restrictions. No promotional language, no external URLs in the body, correct {{n}} variable format with samples. **`grade_progress_nudge` specifically is proactive re-engagement outreach the learner didn't just ask for** — Meta may classify it as Marketing rather than Utility on review, which would add per-conversation cost and stricter opt-in requirements. Submit as Utility first since it's genuinely a service-continuation message (revisiting an assessment they already started), but be prepared to argue the case or accept a Marketing categorisation if rejected.
 
 ## After launch
 - Test the full flow end-to-end on the production number.

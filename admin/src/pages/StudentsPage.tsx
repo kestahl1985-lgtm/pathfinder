@@ -35,7 +35,9 @@ export default function StudentsPage() {
     return (
       s.phone.includes(term) ||
       s.data?.name?.toLowerCase().includes(term) ||
+      s.data?.surname?.toLowerCase().includes(term) ||
       s.data?.school?.toLowerCase().includes(term) ||
+      s.data?.province?.toLowerCase().includes(term) ||
       s.data?.city?.toLowerCase().includes(term) ||
       s.data?.suburb?.toLowerCase().includes(term)
     );
@@ -53,7 +55,7 @@ export default function StudentsPage() {
           <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name, phone, school, city or suburb…"
+            placeholder="Search by name, surname, phone, school, province, city or suburb…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
@@ -82,6 +84,7 @@ export default function StudentsPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Grade</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">School</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Province</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">City</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Suburb</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Age</th>
@@ -100,16 +103,17 @@ export default function StudentsPage() {
                             {(s.data?.name?.[0] || "?").toUpperCase()}
                           </span>
                         </div>
-                        <span className="font-medium text-navy">{s.data?.name || "—"}</span>
+                        <span className="font-medium text-navy">{[s.data?.name, s.data?.surname].filter(Boolean).join(" ") || "—"}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-600 text-sm">{s.phone.replace("whatsapp:", "")}</td>
                     <td className="px-6 py-4">
                       <span className="inline-block px-3 py-1 bg-brand/10 text-brand rounded-full text-sm font-medium">
-                        {s.data?.grade ? `Grade ${s.data.grade}` : "—"}
+                        {s.data?.grade === "leaver" ? "School leaver" : s.data?.grade ? `Grade ${s.data.grade}` : "—"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.school || "—"}</td>
+                    <td className="px-6 py-4 text-gray-600">{s.data?.province || "—"}</td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.city || "—"}</td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.suburb || "—"}</td>
                     <td className="px-6 py-4 text-gray-600">{s.data?.age || "—"}</td>

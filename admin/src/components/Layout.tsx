@@ -1,6 +1,6 @@
 import { useAuth } from "../lib/auth";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, GraduationCap, Cpu, LogOut, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, GraduationCap, Cpu, LogOut, ClipboardList, TrendingUp, Clock } from "lucide-react";
 
 function LogoMark({ size = 34 }: { size?: number }) {
   return (
@@ -28,6 +28,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/students", label: "Learners", icon: Users },
     { path: "/sponsors", label: "Sponsors", icon: GraduationCap },
+    { path: "/sponsor-impact", label: "Sponsor Impact", icon: TrendingUp },
+    { path: "/reengagement", label: "Re-engagement", icon: Clock },
     { path: "/waitlist", label: "Waitlist", icon: ClipboardList },
     { path: "/backend", label: "System", icon: Cpu },
   ];

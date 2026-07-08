@@ -109,8 +109,11 @@ async function buildReportPdf(d) {
   }
 
   // ---- Intro ----
-  T(`Prepared for ${clean(d.name) || "you"}`, M, y, bold, 22, DARK); y -= 22;
-  const profile = [clean(d.school, 50), d.grade ? `Grade ${d.grade}` : null, d.age ? `Age ${d.age}` : null, clean(d.suburb, 40)].filter(Boolean).join("   ·   ");
+  const fullName = [clean(d.name), clean(d.surname)].filter(Boolean).join(" ");
+  T(`Prepared for ${fullName || "you"}`, M, y, bold, 22, DARK); y -= 22;
+  const location = [clean(d.suburb, 40), clean(d.province, 30)].filter(Boolean).join(", ");
+  const gradeLabel = d.grade === "leaver" ? "School leaver" : d.grade ? `Grade ${d.grade}` : null;
+  const profile = [clean(d.school, 50), gradeLabel, d.age ? `Age ${d.age}` : null, location].filter(Boolean).join("   ·   ");
   if (profile) { T(profile, M, y, font, 11, GREY); y -= 12; }
   y -= 22;
 
