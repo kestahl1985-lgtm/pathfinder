@@ -84,8 +84,8 @@ export default function DashboardPage() {
               <tr className="bg-slate-50 text-slate-500">
                 <th className="text-left font-semibold px-6 py-3">Name</th>
                 <th className="text-left font-semibold px-6 py-3">Phone</th>
-                <th className="text-left font-semibold px-6 py-3">Grade</th>
-                <th className="text-left font-semibold px-6 py-3">School</th>
+                <th className="text-left font-semibold px-6 py-3">Age</th>
+                <th className="text-left font-semibold px-6 py-3">Province</th>
                 <th className="text-left font-semibold px-6 py-3">Status</th>
                 <th className="text-left font-semibold px-6 py-3">Last Active</th>
               </tr>
@@ -102,10 +102,10 @@ export default function DashboardPage() {
                     <td className="px-6 py-3.5 text-slate-500">{s.phone.replace("whatsapp:", "")}</td>
                     <td className="px-6 py-3.5">
                       <span className="inline-block px-2.5 py-0.5 rounded-full bg-brand/10 text-brand text-xs font-semibold">
-                        {s.data?.grade ? `Grade ${s.data.grade}` : "—"}
+                        {s.data?.age || "—"}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-slate-500">{s.data?.school || "—"}</td>
+                    <td className="px-6 py-3.5 text-slate-500">{s.data?.province || "—"}</td>
                     <td className="px-6 py-3.5">
                       {s.report_token ? (
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">✅ Complete</span>

@@ -38,7 +38,7 @@ function freshSession(phone) {
 }
 
 // Drive a session through the full happy-path onboarding (English).
-const ONBOARDING_INPUTS = ["1", "agree", "Thabo", "Nkosi", "Vula High", "17", "Gauteng"];
+const ONBOARDING_INPUTS = ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng"];
 async function runOnboarding(s) {
   let pieces;
   for (const input of ONBOARDING_INPUTS) pieces = await advance(s, input, input);
@@ -51,14 +51,14 @@ async function runOnboarding(s) {
   // ---- 1. Exact onboarding step sequence ----
   await check("onboarding follows the exact step sequence (no grade, no suburb)", async () => {
     const s = freshSession("t-seq");
-    const expectedSteps = ["consent", "name", "surname", "school", "age", "province", "assessment"];
+    const expectedSteps = ["consent", "name", "surname", "age", "province", "assessment"];
     for (let i = 0; i < ONBOARDING_INPUTS.length; i++) {
       await advance(s, ONBOARDING_INPUTS[i], ONBOARDING_INPUTS[i]);
       assert.strictEqual(s.step, expectedSteps[i], `after input ${i + 1} expected step '${expectedSteps[i]}', got '${s.step}'`);
     }
   });
 
-  await check("grade and suburb are never asked and never stored", async () => {
+  await check("grade, suburb and school are never asked and never stored", async () => {
     const s = freshSession("t-nograde");
     const allTexts = [];
     let pieces;
@@ -66,8 +66,9 @@ async function runOnboarding(s) {
       pieces = await advance(s, input, input);
       pieces.forEach((p) => allTexts.push(p.text || ""));
     }
-    assert.ok(!allTexts.some((t) => /what grade|which grade|suburb/i.test(t)), "a prompt mentioned grade or suburb");
+    assert.ok(!allTexts.some((t) => /what grade|which grade|suburb|school/i.test(t)), "a prompt mentioned grade, suburb or school");
     assert.strictEqual(s.data.grade, undefined, "grade was stored");
+    assert.strictEqual(s.data.school, undefined, "school was stored");
     assert.strictEqual(s.data.suburb, undefined, "suburb was stored");
     assert.strictEqual(s.data.province, "Gauteng", "province missing");
   });
@@ -134,7 +135,7 @@ async function runOnboarding(s) {
   });
 
   // ---- 7. Stale sessions from removed flow steps reset gracefully ----
-  for (const staleStep of ["grade", "suburb", "share_consent", "no_such_step"]) {
+  for (const staleStep of ["grade", "suburb", "school", "share_consent", "no_such_step"]) {
     await check(`stale session at removed step '${staleStep}' resets gracefully (no dead end)`, async () => {
       const s = { phone: "t-stale", step: staleStep, data: { lang: "en", name: "Old", grade: 11, suburb: "Somewhere" }, q: 17, responses: [1, 2, 0], report_token: "oldtoken" };
       const pieces = await advance(s, "10", "10");
@@ -144,7 +145,7 @@ async function runOnboarding(s) {
       assert.strictEqual(s.report_token, null, "old report token survived the reset");
       assert.strictEqual(s.data.grade, undefined, "old grade data survived the reset");
       // ...and the reset session walks the NEW flow end-to-end
-      for (const input of ["agree", "Thabo", "Nkosi", "Vula High", "17", "Gauteng"]) await advance(s, input, input);
+      for (const input of ["agree", "Thabo", "Nkosi", "17", "Gauteng"]) await advance(s, input, input);
       assert.strictEqual(s.step, "assessment", "reset session could not complete new onboarding");
     });
   }

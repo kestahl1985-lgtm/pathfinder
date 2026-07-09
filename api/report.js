@@ -113,6 +113,8 @@ async function buildReportPdf(d) {
   T(`Prepared for ${fullName || "you"}`, M, y, bold, 22, DARK); y -= 22;
   const location = [clean(d.suburb, 40), clean(d.province, 30)].filter(Boolean).join(", ");
   const gradeLabel = d.grade === "leaver" ? "School leaver" : d.grade ? `Grade ${d.grade}` : null;
+  // d.school/gradeLabel only render for pre-v3 sessions that still carry
+  // that data; new sessions no longer collect either.
   const profile = [clean(d.school, 50), gradeLabel, d.age ? `Age ${d.age}` : null, location].filter(Boolean).join("   ·   ");
   if (profile) { T(profile, M, y, font, 11, GREY); y -= 12; }
   y -= 22;
