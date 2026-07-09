@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "ignoreCommand": "node tests/flow-sequence.test.js && exit 1 || exit 0",
   "builds": [
     { "src": "api/*.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }

@@ -1,0 +1,22 @@
+# Flow-sequence guarantee — runs the same test that gates Vercel deploys
+# (vercel.json ignoreCommand), but visibly: a red X on the commit/PR when the
+# WhatsApp flow sequence breaks, instead of only a silently-skipped deploy.
+name: flow-sequence-tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  flow-sequence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax-check backend
+        run: |
+          for f in lib/*.js api/*.js; do node --check "$f"; done
+      - name: Flow sequence tests
+        run: node tests/flow-sequence.test.js
