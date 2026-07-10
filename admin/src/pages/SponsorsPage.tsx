@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, GraduationCap } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, GraduationCap, FileText, Upload, Loader2 } from "lucide-react";
 
 // Keep in sync with lib/provinces.js PROVINCES.
 const PROVINCES = [
@@ -34,6 +34,7 @@ interface Course {
   required_subjects: string[] | null;
   duration_years: number | null;
   riasec_match: Record<string, number>;
+  prospectus_url: string | null;
   active: boolean;
 }
 
@@ -118,6 +119,7 @@ export default function SponsorsPage() {
       required_subjects: c.required_subjects?.length ? c.required_subjects : null,
       duration_years: c.duration_years || null,
       riasec_match: buildRiasecMatch(c.primary || "R", c.secondary || ""),
+      prospectus_url: c.prospectus_url || null,
       active: c.active ?? true,
     };
     const { error } = c.id
@@ -214,11 +216,16 @@ export default function SponsorsPage() {
                         <div key={course.id} className="flex items-center justify-between bg-white rounded-xl border border-gray-200 px-4 py-2.5">
                           <div>
                             <div className="font-medium text-navy text-sm">{course.name}</div>
-                            <div className="text-xs text-gray-500">
-                              {TRAITS.find((t) => t.code === primary)?.label}
-                              {secondary ? ` + ${TRAITS.find((t) => t.code === secondary)?.label}` : ""}
-                              {course.duration_years ? ` · ${course.duration_years} yr${course.duration_years !== 1 ? "s" : ""}` : ""}
-                              {!course.active && " · inactive"}
+                            <div className="text-xs text-gray-500 flex items-center gap-1 flex-wrap">
+                              <span>
+                                {TRAITS.find((t) => t.code === primary)?.label}
+                                {secondary ? ` + ${TRAITS.find((t) => t.code === secondary)?.label}` : ""}
+                                {course.duration_years ? ` · ${course.duration_years} yr${course.duration_years !== 1 ? "s" : ""}` : ""}
+                                {!course.active && " · inactive"}
+                              </span>
+                              {course.prospectus_url && (
+                                <span className="inline-flex items-center gap-0.5 text-brand"><FileText size={11} /> Prospectus attached</span>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
@@ -332,8 +339,28 @@ function CollegeModal({ college, onClose, onSave }: { college: Partial<College>;
   );
 }
 
+// 10MB matches the bucket's file_size_limit set in the
+// 20260710000001_course_prospectus.sql migration — keep these in sync.
+const MAX_PROSPECTUS_BYTES = 10 * 1024 * 1024;
+
 function CourseModal({ course, onClose, onSave }: { course: Partial<Course> & { primary?: string; secondary?: string }; onClose: () => void; onSave: (c: Partial<Course> & { primary?: string; secondary?: string }) => void }) {
   const [form, setForm] = useState(course);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  const uploadProspectus = async (file: File) => {
+    setUploadError("");
+    if (file.type !== "application/pdf") { setUploadError("Prospectus must be a PDF."); return; }
+    if (file.size > MAX_PROSPECTUS_BYTES) { setUploadError("PDF is too large (10MB max)."); return; }
+    setUploading(true);
+    const path = `${crypto.randomUUID()}.pdf`;
+    const { error } = await supabase.storage.from("prospectuses").upload(path, file, { contentType: "application/pdf" });
+    setUploading(false);
+    if (error) { setUploadError(error.message); return; }
+    const { data } = supabase.storage.from("prospectuses").getPublicUrl(path);
+    setForm((f) => ({ ...f, prospectus_url: data.publicUrl }));
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
@@ -384,6 +411,39 @@ function CourseModal({ course, onClose, onSave }: { course: Partial<Course> & { 
             onChange={(e) => setForm({ ...form, duration_years: e.target.value ? parseInt(e.target.value, 10) : null })}
             className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand"
           />
+
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Prospectus PDF (optional)</label>
+            {form.prospectus_url ? (
+              <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm bg-gray-50">
+                <a href={form.prospectus_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-brand truncate">
+                  <FileText size={14} className="shrink-0" /> <span className="truncate">View current prospectus</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, prospectus_url: null }))}
+                  className="text-gray-400 hover:text-red-500 shrink-0"
+                  title="Remove"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex items-center justify-center gap-2 px-3.5 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-brand hover:text-brand cursor-pointer transition">
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                {uploading ? "Uploading…" : "Upload PDF — sent to matching learners as an actual document"}
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadProspectus(f); e.target.value = ""; }}
+                />
+              </label>
+            )}
+            {uploadError && <p className="text-xs text-red-600 mt-1">{uploadError}</p>}
+          </div>
+
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
@@ -394,7 +454,8 @@ function CourseModal({ course, onClose, onSave }: { course: Partial<Course> & { 
           </label>
           <button
             onClick={() => onSave(form)}
-            className="w-full py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand2 to-brand hover:shadow-lg transition"
+            disabled={uploading}
+            className="w-full py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand2 to-brand hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save course
           </button>

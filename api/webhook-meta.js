@@ -122,7 +122,7 @@ function sendPiece(to, piece) {
     return graphPost({
       ...base,
       type: "document",
-      document: { link: piece.mediaUrl, caption: piece.text, filename: "Vula-Career-Report.pdf" },
+      document: { link: piece.mediaUrl, caption: piece.text, filename: piece.filename || "Vula-Career-Report.pdf" },
     });
   }
   return graphPost({ ...base, type: "text", text: { body: piece.text } });
@@ -136,6 +136,16 @@ async function respond(from, pieces) {
   if (hasMeta()) {
     for (const piece of pieces) await sendPiece(from, piece);
   }
+}
+
+// Meta's Cloud API identifies the sender as bare E.164 digits (e.g.
+// "27821234567"), no "+", no prefix. api/webhook.js (Twilio) keys sessions
+// as "whatsapp:+27821234567". Normalize to that same shape so a session
+// started on one channel is still reachable after switching the webhook
+// target between them, and the two can never silently fork the same
+// learner into two different session rows if ever active at once.
+function toSessionPhone(rawFrom) {
+  return `whatsapp:+${rawFrom.replace(/[^\d]/g, "")}`;
 }
 
 // ===================== Inbound parsing =====================
@@ -217,7 +227,11 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { from, messageId, rawBody, buttonPayload } = parsed;
+  const { from: rawFrom, messageId, rawBody, buttonPayload } = parsed;
+  // rawFrom (Meta's bare-digits shape) is what the Graph API needs as the
+  // "to" recipient when replying; from (normalized) is what session storage
+  // uses as the key — see toSessionPhone() above for why these differ.
+  const from = toSessionPhone(rawFrom);
   const input = buttonPayload || rawBody;
 
   // --- Rate limit per sender (defence in depth) ---
@@ -234,22 +248,22 @@ module.exports = async (req, res) => {
   // POPIA: let users delete their data or stop messages at any time.
   if (cmd === "DELETE") {
     await deleteSession(from);
-    await respond(from, [{ type: "text", text: i18n.t(cmdLang, "deleteConfirm") }]);
+    await respond(rawFrom, [{ type: "text", text: i18n.t(cmdLang, "deleteConfirm") }]);
     res.statusCode = 200;
     res.end("EVENT_RECEIVED");
     return;
   }
   if (cmd === "STOP") {
-    await respond(from, [{ type: "text", text: i18n.t(cmdLang, "stopConfirm") }]);
+    await respond(rawFrom, [{ type: "text", text: i18n.t(cmdLang, "stopConfirm") }]);
     res.statusCode = 200;
     res.end("EVENT_RECEIVED");
     return;
   }
   if (cmd === "REPORT") {
     if (session && session.report_token) {
-      await respond(from, [reportPiece(session)]);
+      await respond(rawFrom, [reportPiece(session)]);
     } else {
-      await respond(from, [{ type: "text", text: i18n.t(cmdLang, "reportNotReady") }]);
+      await respond(rawFrom, [{ type: "text", text: i18n.t(cmdLang, "reportNotReady") }]);
     }
     res.statusCode = 200;
     res.end("EVENT_RECEIVED");
@@ -287,7 +301,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  await respond(from, pieces);
+  await respond(rawFrom, pieces);
   res.statusCode = 200;
   res.end("EVENT_RECEIVED");
 };
