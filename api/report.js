@@ -19,6 +19,7 @@ const INK = rgb(0.13, 0.16, 0.22);
 const GREY = rgb(0.45, 0.48, 0.56);
 const TRACK = rgb(0.9, 0.91, 0.95);
 const WHITE = rgb(1, 1, 1);
+const AI_IMPACT_COLORS = { Low: rgb(0.16, 0.6, 0.29), Medium: rgb(0.82, 0.6, 0.02), High: rgb(0.82, 0.24, 0.24) };
 
 const PAGE_W = 595, PAGE_H = 842, M = 50;
 const CW = PAGE_W - M * 2;
@@ -169,10 +170,14 @@ async function buildReportPdf(d) {
     TR(`${i + 1}`, M + 14, y + 1, bold, 12, WHITE);
     T(c.name, M + 30, y + 1, bold, 13, DARK); y -= 24;
 
-    [["Why it fits you", strengths + c.why], ["Subjects you'll need", c.subjects], ["How to qualify", c.qual]].forEach(([label, body]) => {
+    const rows = [["Why it fits you", strengths + c.why, INK], ["Subjects you'll need", c.subjects, INK], ["How to qualify", c.qual, INK]];
+    if (c.aiImpact) {
+      rows.push(["AI impact on this career", `${c.aiImpact} — ${c.aiImpactNote}`, AI_IMPACT_COLORS[c.aiImpact] || INK]);
+    }
+    rows.forEach(([label, body, color]) => {
       ensure(26);
       T(label.toUpperCase(), M + 30, y, bold, 8.5, BRAND2); y -= 12;
-      wrap(body, font, 10.5, CW - 36).forEach((ln) => { ensure(13); T(ln, M + 30, y, font, 10.5, INK); y -= 13; });
+      wrap(body, font, 10.5, CW - 36).forEach((ln) => { ensure(13); T(ln, M + 30, y, font, 10.5, color); y -= 13; });
       y -= 3;
     });
     y -= 8;
