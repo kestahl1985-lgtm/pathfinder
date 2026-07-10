@@ -134,7 +134,16 @@ function sendPiece(to, piece) {
 // it), which is worse than the small added latency of sending sequentially.
 async function respond(from, pieces) {
   if (hasMeta()) {
-    for (const piece of pieces) await sendPiece(from, piece);
+    for (const piece of pieces) {
+      // graphPost() never rejects (network errors resolve to {ok:false} too),
+      // so a delivery failure here was previously silent — log it so an
+      // outage or a rejected send is actually visible instead of just
+      // looking like the learner "went quiet".
+      const result = await sendPiece(from, piece);
+      if (!result.ok) {
+        console.error(`Meta send failed for ${from} (${piece.type}): status=${result.status || "n/a"} error=${result.error || ""} body=${(result.data || "").slice(0, 300)}`);
+      }
+    }
   }
 }
 

@@ -224,7 +224,18 @@ module.exports = async (req, res) => {
 async function respond(res, from, pieces) {
   if (hasTwilio()) {
     try {
-      for (const piece of pieces) await sendPiece(from, piece);
+      for (const piece of pieces) {
+        // twilioPost() never rejects (network errors resolve to {ok:false}
+        // too), so this was previously silent on failure — a learner could
+        // be mid-conversation, our reply could fail to actually reach
+        // WhatsApp, and nothing anywhere would show it. Log loudly instead;
+        // still returns 200 to Twilio's webhook since retrying the inbound
+        // message wouldn't fix an outbound delivery failure anyway.
+        const result = await sendPiece(from, piece);
+        if (!result.ok) {
+          console.error(`Twilio send failed for ${from} (${piece.type}): status=${result.status || "n/a"} error=${result.error || ""} body=${(result.data || "").slice(0, 300)}`);
+        }
+      }
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/xml");
       res.end(emptyTwiml());
