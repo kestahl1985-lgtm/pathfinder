@@ -70,7 +70,7 @@ export default function StudentsPage() {
         <div className="text-center py-12">
           <p className="text-gray-600 mb-2">No learners found</p>
           <p className="text-sm text-gray-500">
-            {searchTerm ? "Try adjusting your search" : "Learners will appear here once they start the assessment"}
+            {searchTerm ? "Try adjusting your search" : "Students will appear here once they start the assessment"}
           </p>
         </div>
       )}

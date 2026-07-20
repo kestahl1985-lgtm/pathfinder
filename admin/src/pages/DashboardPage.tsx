@@ -41,7 +41,7 @@ export default function DashboardPage() {
   const conversion = sessions.length > 0 ? Math.round((completed.length / sessions.length) * 100) : 0;
 
   const stats = [
-    { label: "Total Learners", value: sessions.length, icon: Users, ring: "from-brand2/20 to-brand2/5", fg: "text-brand2" },
+    { label: "Total Students", value: sessions.length, icon: Users, ring: "from-brand2/20 to-brand2/5", fg: "text-brand2" },
     { label: "Completed Assessments", value: completed.length, icon: CheckCircle, ring: "from-lime/25 to-lime/5", fg: "text-[#6f9e00]" },
     { label: "Active Sponsors", value: sponsorCount, icon: GraduationCap, ring: "from-brand/20 to-brand/5", fg: "text-brand" },
     { label: "Conversion", value: `${conversion}%`, icon: TrendingUp, ring: "from-[#25d366]/20 to-[#25d366]/5", fg: "text-[#1aa34a]" },
@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
       <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-navy">Recent Learners</h2>
+          <h2 className="text-lg font-bold text-navy">Recent Students</h2>
           <span className="text-xs text-slate-400">{sessions.length} total</span>
         </div>
         <div className="overflow-x-auto">

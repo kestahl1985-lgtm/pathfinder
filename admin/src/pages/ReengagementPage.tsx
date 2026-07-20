@@ -82,7 +82,7 @@ export default function ReengagementPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-navy mb-2">Re-engagement Schedule</h1>
         <p className="text-gray-600">
-          Learners due for a check-in nudge. Sending is manual — review who's on the list and send (or skip) each one.
+          Students due for a check-in nudge. Sending is manual — review who's on the list and send (or skip) each one.
         </p>
       </div>
 
@@ -117,7 +117,7 @@ export default function ReengagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Learner</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Student</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Queued</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy"></th>
