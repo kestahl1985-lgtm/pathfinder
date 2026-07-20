@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import { Search, MessageCircle } from "lucide-react";
+import { Search, MessageCircle, FileDown } from "lucide-react";
 import { useState } from "react";
 import MessageModal from "../components/MessageModal";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Session {
   phone: string;
@@ -106,7 +108,15 @@ export default function StudentsPage() {
                     <td className="px-6 py-4 text-gray-600">{s.data?.age || "—"}</td>
                     <td className="px-6 py-4">
                       {s.report_token ? (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">✅ Complete</span>
+                        <a
+                          href={`${API_URL}/report?t=${s.report_token}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Download PDF report"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold hover:bg-green-200 transition"
+                        >
+                          ✅ Complete <FileDown size={12} />
+                        </a>
                       ) : (
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold">⏳ Q{s.q} / 30</span>
                       )}

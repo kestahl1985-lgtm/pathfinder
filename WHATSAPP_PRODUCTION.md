@@ -3,7 +3,7 @@
 Moving from the Twilio WhatsApp **sandbox** to a **production** WhatsApp Business sender.
 
 ## Sender number
-- **Number:** 070 487 6280 → international format **+27 70 487 6280** (standard SA mobile).
+- **Number:** 076 842 8433 → international format **+27 76 842 8433** (standard SA mobile).
 - ✅ Standard mobile: **SMS verification works** — no voice-call workaround needed.
 - ⚠️ Must **NOT** be on a personal WhatsApp account. Standard mobiles often already have WhatsApp — if so, open WhatsApp → Settings → Account → **Delete my account** first, wait a few minutes, then verify as an API sender.
 
@@ -20,7 +20,7 @@ Moving from the Twilio WhatsApp **sandbox** to a **production** WhatsApp Busines
 ## Steps (do in order)
 1. **Twilio Console → Messaging → Senders → WhatsApp senders → Create new sender.**
 2. Connect/create the **Meta Business Manager** and **WhatsApp Business Account (WABA)**.
-3. Enter the sender number (+27 70 487 6280) → verify via **SMS code**.
+3. Enter the sender number (+27 76 842 8433) → verify via **SMS code**.
 4. Set **Display name**: `Vula Careers` (Meta reviews — must match the business, no superlatives/URLs).
 5. Set profile: logo, business description, website, email, category = Education.
 6. Submit **business verification** (upload CIPC docs above).
@@ -66,5 +66,5 @@ Sample {{1}} = "Thabo"
 
 ## After launch
 - Test the full flow end-to-end on the production number.
-- Update marketing site CTA from "Join the waitlist" → "Start on WhatsApp" with a `wa.me/27704876280?text=START` link.
+- Update marketing site CTA from "Join the waitlist" → "Start on WhatsApp" with a `wa.me/27768428433?text=START` link.
 - Monitor Twilio + Meta quality rating (stay above "Medium").

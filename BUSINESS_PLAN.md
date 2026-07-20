@@ -36,8 +36,8 @@ Vula deliberately does **not** sell qualified leads. Instead:
 ### Pricing structure (proposed, to validate with first sponsors)
 | Tier | What's included | Suggested price |
 |---|---|---|
-| **City Sponsor** | 1 institution, up to 3 courses, shown to learners in one city | R2,500–R5,000/month |
-| **National Sponsor** | Shown to all learners regardless of city | R6,000–R12,000/month |
+| **City Sponsor** | 1 institution, up to 3 courses, shown to learners in one city | R5,000/month |
+| **National Sponsor** | Shown to all learners regardless of city | R20,000/month |
 | **Founding Sponsor** (first 5–10 sponsors) | Discounted rate, logo on marketing site, case-study collaboration | 50% off Year 1 |
 
 These are starting hypotheses, not fixed — validate against what a marketing/recruitment department already spends per acquired student via other channels (open days, print, digital ads), which is typically far higher than these figures.
@@ -74,7 +74,7 @@ Launch city-first (Cape Town), recruit an initial cohort of "founding sponsors" 
 ## 9. Team & Operations
 
 - Founder-operated at this stage (Kyal Stahl, Information Officer). Solo/lean team is appropriate for an MVP-to-early-traction stage; plan to bring in a part-time sponsor/partnerships lead once the first 3–5 paying sponsors are signed (sales cycle for institutional budgets is relationship-heavy and time-consuming).
-- Legal/compliance: attorney review of POPIA/consent flows still outstanding — prioritise before scaling sponsor volume or learner numbers materially, given minors are involved.
+- Legal/compliance: attorney review of POPIA/consent flows and the sponsorship agreement template completed and confirmed fit for purpose (10 July 2026).
 
 ## 10. Financial Plan (high-level)
 
@@ -92,7 +92,7 @@ Launch city-first (Cape Town), recruit an initial cohort of "founding sponsors" 
 
 | Risk | Mitigation |
 |---|---|
-| POPIA/legal exposure (minors) | Attorney review of consent flow and privacy pages (outstanding — see project memory); RLS-locked DB; DELETE/STOP always honoured |
+| POPIA/legal exposure (minors) | Attorney review of consent flow and privacy pages completed (10 July 2026); RLS-locked DB; DELETE/STOP always honoured |
 | Meta/WhatsApp Business approval delay | Templates and business verification already submitted; sandbox remains a fallback in the interim |
 | Sponsor sales cycle is slow (institutional budgets, procurement) | Start with smaller, more agile private colleges/training providers alongside university outreach; corporate CSI/Skills Development budgets often move faster than academic marketing budgets |
 | Twilio messaging costs scale with learner growth | Monitor cost-per-assessment from day one of production launch; consider WhatsApp's free-tier "service conversation" windows to minimise paid template sends |

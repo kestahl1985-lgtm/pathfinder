@@ -129,7 +129,7 @@ The backend (`api/`) has **no third-party runtime dependencies** (uses Node's bu
 
 | # | Finding | Code status | Your action to activate |
 |---|---------|-------------|-------------------------|
-| 1 | Permissive RLS | ✅ **APPLIED & VERIFIED** (29 Jun 2026) — lockdown SQL run; confirmed the anon key can no longer read student PII (`[]`), service role still works. Allowlist seeded with `admin@pathfinder.local`. | Done |
+| 1 | Permissive RLS | ✅ **APPLIED & VERIFIED** (29 Jun 2026) — lockdown SQL run; confirmed the anon key can no longer read student PII (`[]`), service role still works. Allowlist seeded with `admin@pathfinder.local` *(placeholder — replaced with the real admin address via migration `20260717000001_seed_real_admin.sql`, 17 Jul 2026)*. | Done |
 | 2 | Webhook signature | ✅ Implemented & tested | Set `WEBHOOK_URL=https://pathfinder-backend-one.vercel.app/webhook` in Vercel; redeploy |
 | 3 | Rotate secrets | ⚠️ You only | Rotate Twilio Auth Token + (if possible) Supabase service key; update Vercel env |
 | 4 | Rate limiting | ✅ Implemented & tested | None (active on deploy) |
@@ -163,7 +163,7 @@ Probed the live system top-to-bottom after the domain, waitlist, and PDF report 
 2. **Disable public sign-ups in Supabase Auth** (`disable_signup` is currently false; only allow-listed admins need accounts). — Medium
 3. **Enable the registrar lock** on the domain at domains.co.za (status is `ok`, not `clientTransferProhibited`) to prevent domain hijack; optionally enable **DNSSEC**. — Low/Med
 4. **When email is set up**, add **SPF, DKIM and DMARC** records to stop spoofing/phishing from your domain. — Med (future)
-5. **Attorney review** of the legal pages + register the entity / Information Officer with the Information Regulator. — Ongoing
+5. **Attorney review of the legal pages: ✅ done, confirmed fit for purpose (10 July 2026).** Registering the entity / Information Officer with the Information Regulator is still outstanding. — Low
 
 ## Full re-inspection — 8-9 July 2026 (post grade/province rework, sponsor-impact + re-engagement features)
 
@@ -195,9 +195,9 @@ Requested by the user as a dedicated "make sure we're rock solid" pass, since a 
 
 - **`admin/`'s dev dependencies** (`vite`, `esbuild`) have 1 moderate + 1 high advisory (`npm audit`). Both are **dev-server-only** issues (arbitrary-origin requests to `vite dev`, path traversal in dev asset serving) — they don't affect the deployed production build (static files, no dev server running). The only fix available is `npm audit fix --force`, which bumps `vite` 5→8, a breaking major version change. Didn't force this mid-audit without dedicated testing time; recommend doing it as its own tracked task with a full admin build/dev verification pass afterward, not silently as a security-patch side effect.
 
-### ⚠️ Still requires you (unchanged from June, carried forward — cannot be done in code)
+### ⚠️ Still requires you (carried forward — cannot be done in code)
 
-Same 5 items as before: rotate Twilio Auth Token + Supabase service-role key (shared in plaintext during original setup); disable public sign-ups in Supabase Auth; enable domain registrar lock/DNSSEC; SPF/DKIM/DMARC once email is set up; attorney review of legal pages + Information Regulator registration. None of these are new — see the June section above for detail. **The rotation item (Twilio + Supabase) is the single highest-priority item still outstanding from either review pass** since it's been open the longest.
+Rotate Twilio Auth Token + Supabase service-role key (shared in plaintext during original setup); disable public sign-ups in Supabase Auth; enable domain registrar lock/DNSSEC; SPF/DKIM/DMARC once email is set up; register the entity / Information Officer with the Information Regulator. None of these are new — see the June section above for detail. **Attorney review of the legal pages and the sponsorship agreement template is done** (confirmed fit for purpose, 10 July 2026) — removed from this list. **The secret-rotation item (Twilio + Supabase) is the single highest-priority item still outstanding from either review pass** since it's been open the longest.
 
 ## Recommended order of remediation
 

@@ -1,6 +1,6 @@
 # Vula Careers — Sponsorship Agreement (Template)
 
-> **Attorney review required before use.** This is a drafting starting point, not a finished legal instrument. Before sending this to a real sponsor, have it reviewed by a South African attorney — in particular the data protection clause (§7), the limitation of liability (§10), and the POPIA references, given Vula's user base includes minors. This mirrors the same "template, not final" status as `web/privacy.html` and `web/popia.html`.
+> **Attorney-reviewed (confirmed fit for purpose, 10 July 2026).** Still fill in the bracketed Schedule A fields per sponsor before sending.
 
 ---
 
