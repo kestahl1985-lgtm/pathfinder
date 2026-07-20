@@ -26,6 +26,7 @@
     { "src": "/cleanup", "dest": "/api/cleanup.js" },
     { "src": "/reengage", "dest": "/api/reengage.js" },
     { "src": "/reengage-action", "dest": "/api/reengage-action.js" },
+    { "src": "/waitlist-invite", "dest": "/api/waitlist-invite.js" },
     { "src": "/", "dest": "/public/index.html" }
   ],
   "crons": [

@@ -47,8 +47,8 @@ export default function StudentsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-navy mb-2">Learners</h1>
-        <p className="text-gray-600">All WhatsApp assessment sessions</p>
+        <h1 className="text-3xl font-bold text-navy mb-2">Students</h1>
+        <p className="text-gray-600">All WhatsApp assessment sessions. Completed students have a downloadable PDF report.</p>
       </div>
 
       <div className="mb-6">
@@ -86,6 +86,7 @@ export default function StudentsPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Province</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Age</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Report</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Last Active</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy"></th>
                 </tr>
@@ -108,17 +109,24 @@ export default function StudentsPage() {
                     <td className="px-6 py-4 text-gray-600">{s.data?.age || "—"}</td>
                     <td className="px-6 py-4">
                       {s.report_token ? (
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">✅ Complete</span>
+                      ) : (
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold">⏳ Q{s.q} / 30</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {s.report_token ? (
                         <a
                           href={`${API_URL}/report?t=${s.report_token}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Download PDF report"
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold hover:bg-green-200 transition"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-brand2 to-brand hover:shadow-md transition"
                         >
-                          ✅ Complete <FileDown size={12} />
+                          <FileDown size={14} /> PDF
                         </a>
                       ) : (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold">⏳ Q{s.q} / 30</span>
+                        <span className="text-gray-400 text-sm">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-gray-500 text-sm">

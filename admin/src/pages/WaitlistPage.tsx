@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import { Search, MessageCircle, Mail } from "lucide-react";
+import { Search, Send, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useState } from "react";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface WaitlistEntry {
   id: string;
@@ -9,42 +11,18 @@ interface WaitlistEntry {
   contact: string;
   source: string;
   created_at: string;
+  invited_at: string | null;
 }
-
-// Waitlist contacts haven't messaged the Vula WhatsApp number yet, so the
-// admin-triggered /send-message endpoint won't work for them (it deliberately
-// only sends to phones with an existing whatsapp_sessions row, to keep the
-// business number from being used to cold-message people — a WhatsApp policy
-// violation risk). Instead this opens a click-to-chat wa.me link with a
-// pre-filled invite, sent from the admin's own WhatsApp.
-const VULA_WHATSAPP_NUMBER = "27768428433";
 
 function isLikelyPhone(contact: string): boolean {
   return /\d{6,}/.test(contact.replace(/\s/g, ""));
 }
 
-function toWaMeDigits(contact: string): string {
-  let digits = contact.replace(/[^\d+]/g, "");
-  if (digits.startsWith("+")) digits = digits.slice(1);
-  else if (digits.startsWith("0")) digits = "27" + digits.slice(1); // assume SA local format
-  return digits;
-}
-
-function inviteWaMeLink(entry: WaitlistEntry): string {
-  const firstName = entry.name?.split(" ")[0] || "there";
-  const text = `Hi ${firstName}! 👋 Thanks for joining the Vula waitlist. You can start your free career assessment right now — just message START to +27 76 842 8433 on WhatsApp. Takes about 5 minutes!`;
-  return `https://wa.me/${toWaMeDigits(entry.contact)}?text=${encodeURIComponent(text)}`;
-}
-
-function inviteMailtoLink(entry: WaitlistEntry): string {
-  const firstName = entry.name?.split(" ")[0] || "there";
-  const subject = "Vula is live — start your free career assessment";
-  const body = `Hi ${firstName},\n\nThanks for joining the Vula waitlist. You can start your free career assessment right now on WhatsApp — just message START to +27 76 842 8433. Takes about 5 minutes.\n\n— Vula Career Guide`;
-  return `mailto:${entry.contact}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
 export default function WaitlistPage() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [errorById, setErrorById] = useState<Record<string, string>>({});
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["waitlist"],
@@ -62,6 +40,28 @@ export default function WaitlistPage() {
     const term = searchTerm.toLowerCase();
     return e.name?.toLowerCase().includes(term) || e.contact?.toLowerCase().includes(term);
   });
+
+  const sendInvite = async (entry: WaitlistEntry) => {
+    setErrorById((m) => ({ ...m, [entry.id]: "" }));
+    setSendingId(entry.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Your session expired — please sign in again.");
+
+      const res = await fetch(`${API_URL}/waitlist-invite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ waitlistId: entry.id }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || "Failed to send invite");
+      queryClient.invalidateQueries({ queryKey: ["waitlist"] });
+    } catch (err) {
+      setErrorById((m) => ({ ...m, [entry.id]: err instanceof Error ? err.message : "Failed to send invite" }));
+    } finally {
+      setSendingId(null);
+    }
+  };
 
   return (
     <div>
@@ -104,12 +104,14 @@ export default function WaitlistPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Contact</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Source</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Signed Up</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy"></th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-navy">Invite</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((e) => {
                   const phoneContact = isLikelyPhone(e.contact);
+                  const sending = sendingId === e.id;
+                  const error = errorById[e.id];
                   return (
                     <tr key={e.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
                       <td className="px-6 py-4">
@@ -132,24 +134,31 @@ export default function WaitlistPage() {
                         {new Date(e.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
-                        {phoneContact ? (
-                          <a
-                            href={inviteWaMeLink(e)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Invite via WhatsApp"
-                            className="p-2 rounded-lg text-brand hover:bg-brand/10 transition inline-flex"
-                          >
-                            <MessageCircle size={18} />
-                          </a>
+                        {!phoneContact ? (
+                          <span className="text-xs text-gray-400" title="Email contact — WhatsApp invite needs a phone number">
+                            Email only
+                          </span>
+                        ) : e.invited_at ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700">
+                            <CheckCircle2 size={14} /> Invited {new Date(e.invited_at).toLocaleDateString()}
+                          </span>
                         ) : (
-                          <a
-                            href={inviteMailtoLink(e)}
-                            title="Invite via email"
-                            className="p-2 rounded-lg text-brand hover:bg-brand/10 transition inline-flex"
-                          >
-                            <Mail size={18} />
-                          </a>
+                          <div>
+                            <button
+                              onClick={() => sendInvite(e)}
+                              disabled={sending}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-brand2 to-brand hover:shadow-md transition disabled:opacity-50"
+                            >
+                              {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                              {sending ? "Sending…" : "Send Vula invite"}
+                            </button>
+                            {error && (
+                              <div className="flex items-start gap-1 mt-1.5 text-xs text-red-600 max-w-[220px]">
+                                <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                                <span>{error}</span>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>

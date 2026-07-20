@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const nav = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/students", label: "Learners", icon: Users },
+    { path: "/students", label: "Students", icon: Users },
     { path: "/sponsors", label: "Sponsors", icon: GraduationCap },
     { path: "/sponsor-impact", label: "Sponsor Impact", icon: TrendingUp },
     { path: "/reengagement", label: "Re-engagement", icon: Clock },
