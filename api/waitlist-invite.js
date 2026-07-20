@@ -3,22 +3,29 @@
 // POST { waitlistId } with Authorization: Bearer <supabase access token>.
 //
 // Waitlist contacts have never messaged the Vula number, so — unlike
-// api/send-message.js — this can't send free-form text (WhatsApp Business
-// policy only allows a pre-approved *template* message for genuine first
-// contact; see api/reengage-action.js's header for the same constraint on
-// the re-engagement side). This sends the static "welcome_optin" template
-// via the Meta Cloud API. That template must be created and approved in
-// Meta Business Manager before this can actually deliver anything (see
-// WHATSAPP_PRODUCTION.md) — until then this fails cleanly with the Meta
-// error surfaced to the admin, not a silent no-op.
+// api/send-message.js — this can't send free-form text. WhatsApp only
+// allows a pre-approved *template* message for business-initiated first
+// contact (a platform rule, independent of the messaging provider). We send
+// via Twilio's Content API (the same provider and auth the bot already uses
+// for its button templates in api/webhook.js), using an approved "welcome"
+// Content template identified by CONTENT_SID_WELCOME.
+//
+// SETUP REQUIRED before this delivers anything: create a WhatsApp "welcome"
+// Content template in the Twilio Console, submit it for WhatsApp approval,
+// then set CONTENT_SID_WELCOME (the HX... SID) in the backend's Vercel env.
+// Until that's set this fails cleanly with a clear message to the admin,
+// not a silent no-op. (When Meta business verification is done later, this
+// can move to the Meta Cloud API like api/reengage-action.js — but Twilio
+// keeps it working now on the existing, already-configured account.)
 
 const https = require("https");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const META_ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
-const META_PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
-const GRAPH_VERSION = process.env.META_GRAPH_VERSION || "v21.0";
+const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+const CONTENT_SID_WELCOME = process.env.CONTENT_SID_WELCOME;
 
 const ALLOWED_ORIGINS = ["https://admin.vulacareers.co.za", "https://pathfinder-admin-pi.vercel.app"];
 
@@ -98,26 +105,34 @@ function isLikelyPhone(contact) {
   return /\d{6,}/.test(contact.replace(/\s/g, ""));
 }
 
-function toE164(contact) {
+// Normalize to E.164 with leading + for Twilio's whatsapp: address.
+function toWhatsAppAddr(contact) {
   let digits = contact.replace(/[^\d+]/g, "");
-  if (digits.startsWith("+")) digits = digits.slice(1);
-  else if (digits.startsWith("0")) digits = "27" + digits.slice(1); // assume SA local format
-  return digits;
+  if (digits.startsWith("+")) { /* already E.164 */ }
+  else if (digits.startsWith("0")) digits = "+27" + digits.slice(1); // SA local
+  else if (digits.startsWith("27")) digits = "+" + digits;
+  else digits = "+" + digits;
+  return `whatsapp:${digits}`;
 }
 
-function sendWelcomeTemplate(phoneE164) {
+// Send the approved welcome Content template via Twilio.
+function sendWelcomeTemplate(toAddr) {
   return new Promise((resolve) => {
-    const payload = {
-      messaging_product: "whatsapp",
-      to: phoneE164,
-      type: "template",
-      template: { name: "welcome_optin", language: { code: "en_US" } },
-    };
-    const body = JSON.stringify(payload);
+    const params = new URLSearchParams({
+      From: `whatsapp:${PHONE_NUMBER}`,
+      To: toAddr,
+      ContentSid: CONTENT_SID_WELCOME,
+    });
+    const body = params.toString();
+    const auth = Buffer.from(`${ACCOUNT_SID}:${AUTH_TOKEN}`).toString("base64");
     const req = https.request(
-      { hostname: "graph.facebook.com", path: `/${GRAPH_VERSION}/${META_PHONE_NUMBER_ID}/messages`, method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_ACCESS_TOKEN}`, "Content-Length": Buffer.byteLength(body) } },
-      (res) => { let d = ""; res.on("data", (c) => (d += c)); res.on("end", () => { let parsed = {}; try { parsed = JSON.parse(d); } catch {} resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, data: parsed }); }); }
+      { hostname: "api.twilio.com", path: `/2010-04-01/Accounts/${ACCOUNT_SID}/Messages.json`, method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: `Basic ${auth}`, "Content-Length": Buffer.byteLength(body) } },
+      (res) => {
+        let d = "";
+        res.on("data", (c) => (d += c));
+        res.on("end", () => { let parsed = {}; try { parsed = JSON.parse(d); } catch {} resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, data: parsed }); });
+      }
     );
     req.on("error", (e) => resolve({ ok: false, error: e.message }));
     req.write(body);
@@ -161,14 +176,17 @@ module.exports = async (req, res) => {
     res.statusCode = 400; res.end(JSON.stringify({ error: "This contact is an email, not a phone — can't send a WhatsApp invite" })); return;
   }
 
-  if (!META_ACCESS_TOKEN || !META_PHONE_NUMBER_ID) {
-    res.statusCode = 500; res.end(JSON.stringify({ error: "Meta WhatsApp credentials not configured yet" })); return;
+  if (!ACCOUNT_SID || !AUTH_TOKEN || !PHONE_NUMBER) {
+    res.statusCode = 500; res.end(JSON.stringify({ error: "Twilio not configured" })); return;
+  }
+  if (!CONTENT_SID_WELCOME) {
+    res.statusCode = 500; res.end(JSON.stringify({ error: "No welcome template configured yet — create an approved WhatsApp welcome template in Twilio and set CONTENT_SID_WELCOME. See api/waitlist-invite.js." })); return;
   }
 
-  const result = await sendWelcomeTemplate(toE164(entry.contact));
+  const result = await sendWelcomeTemplate(toWhatsAppAddr(entry.contact));
   if (!result.ok) {
-    // Likely means welcome_optin isn't approved in Meta Business Manager yet.
-    const msg = (result.data && result.data.error && result.data.error.message) || result.error || `HTTP ${result.status}`;
+    // Likely the template isn't approved yet, or the number can't receive WhatsApp.
+    const msg = (result.data && result.data.message) || result.error || `HTTP ${result.status}`;
     res.statusCode = 502; res.end(JSON.stringify({ ok: false, error: msg }));
     return;
   }
