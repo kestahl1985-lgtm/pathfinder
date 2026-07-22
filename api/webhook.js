@@ -101,6 +101,7 @@ function twilioPost(params) {
 function sendPiece(to, piece) {
   const base = { From: `whatsapp:${PHONE_NUMBER}`, To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}` };
   if (piece.type === "language") return twilioPost({ ...base, Body: languageListText(piece.retry) });
+  if (piece.type === "province") return twilioPost({ ...base, Body: provinceListText(piece) });
   if (piece.type === "yesno") return twilioPost({ ...base, ContentSid: SID_YESNO, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "consent") return twilioPost({ ...base, ContentSid: SID_CONSENT, ContentVariables: JSON.stringify({ 1: piece.text }) });
   if (piece.type === "media") return twilioPost({ ...base, Body: piece.text, MediaUrl: piece.mediaUrl });
@@ -110,6 +111,13 @@ function sendPiece(to, piece) {
 // No Twilio List Picker template is registered for language selection, so
 // this is always sent as a plain numbered list; lib/assessment.js's
 // pickLanguage() accepts the reply as either a number or a language id.
+// Twilio has no registered List Picker template, so the province list degrades
+// to numbered text. pickProvince() accepts the number, the province name typed
+// out, or a known abbreviation — so this path stays fully usable.
+function provinceListText(piece) {
+  return piece.text + "\n\n" + piece.rows.map((p, i) => `${i + 1}. ${p}`).join("\n");
+}
+
 function languageListText(retry) {
   const header = retry ? "🤔 Sorry, that's not a recognised answer. Which language would you like to use? 🌍" : "🌍 Which language would you like to use?";
   return header + "\n\n" + LANGUAGES.map((l, i) => `${i + 1}. ${l.title}`).join("\n");
@@ -119,6 +127,7 @@ function languageListText(retry) {
 function renderFallback(pieces) {
   return pieces.map((p) => {
     if (p.type === "language") return languageListText(p.retry);
+    if (p.type === "province") return provinceListText(p);
     if (p.type === "yesno") return `${p.text}\n\nReply: 0 = No   1 = Maybe   2 = Yes`;
     if (p.type === "consent") return `${p.text}\n\nReply AGREE to continue, or MORE for more info.`;
     if (p.type === "media") return `${p.text}\n\n${p.mediaUrl}`;

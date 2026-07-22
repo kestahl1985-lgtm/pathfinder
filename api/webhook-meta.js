@@ -104,6 +104,23 @@ function sendPiece(to, piece) {
       },
     });
   }
+  if (piece.type === "province") {
+    // 9 provinces + "Other" = 10 rows, exactly WhatsApp's per-list maximum.
+    // Row id IS the canonical province name, so advance() gets a clean value
+    // with no free-text parsing (see pickProvince in lib/assessment.js).
+    return graphPost({
+      ...base,
+      type: "interactive",
+      interactive: {
+        type: "list",
+        body: { text: piece.text },
+        action: {
+          button: piece.button,
+          sections: [{ rows: piece.rows.map((p) => ({ id: p, title: p })) }],
+        },
+      },
+    });
+  }
   if (piece.type === "yesno") {
     return graphPost({
       ...base,
