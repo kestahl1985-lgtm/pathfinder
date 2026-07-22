@@ -50,7 +50,7 @@ Sample {{1}} = "Thabo"
 ### 3. Welcome / opt-in confirmation (Category: Utility)
 Name: `welcome_optin`
 ```
-Welcome to Vula 🌟 Free career guidance for South African learners. Reply *START* to begin your assessment, or *INFO* to learn how we protect your privacy.
+Welcome to Vula 🌟 Free career guidance for South Africans. Reply *START* to begin your assessment, or *INFO* to learn how we protect your privacy.
 ```
 
 ### 4. Re-engagement check-in (Category: Utility, but see note)

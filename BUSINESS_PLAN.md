@@ -4,9 +4,9 @@
 
 ## 1. Executive Summary
 
-Vula is a free, WhatsApp-native career-guidance assessment for South African high school learners (Grades 10–12). In under 5 minutes, a learner answers 30 tappable questions, receives a RIASEC-based career profile, a personalised PDF report (matched careers, required subjects, qualification paths), and — where relevant — sees courses from **sponsoring** colleges, universities and training providers matched to their city and their profile.
+Vula is a free, WhatsApp-native career-guidance assessment, open to anyone in South Africa seeking career direction — school learners choosing subjects, school leavers, and adults retraining or changing career. In under 5 minutes, a user answers 30 tappable questions, receives a RIASEC-based career profile, a personalised PDF report (matched careers, required subjects, qualification paths), and — where relevant — sees courses from **sponsoring** colleges, universities and training providers matched to their province and their profile.
 
-Vula is free for learners, forever. Revenue comes from **institutions and corporates who sponsor visibility** of their courses/programmes in learner results — not from selling learner data. This is a deliberate, lower-risk model given the POPIA sensitivity of working with minors: Vula never hands over a learner's personal details to a sponsor. The learner decides, on their own initiative, whether to reach out.
+Vula is free for everyone who uses it, forever. Revenue comes from **institutions and corporates who sponsor visibility** of their courses/programmes in learner results — not from selling learner data. This is a deliberate, lower-risk model given the POPIA sensitivity of working with minors: Vula never hands over a learner's personal details to a sponsor. The learner decides, on their own initiative, whether to reach out.
 
 **The gap Vula closes**: most SA learners pick subjects in Grade 9/10 with little real information about what those choices lock in or out, and under-resourced schools (1 career counsellor for hundreds of learners, if any) can't fill that gap. Vula meets learners where they already are — WhatsApp, which has near-universal reach even on low-end phones and small data budgets — and turns a 5-minute chat into an actionable plan.
 
@@ -28,23 +28,30 @@ Vula is free for learners, forever. Revenue comes from **institutions and corpor
 
 Vula deliberately does **not** sell qualified leads. Instead:
 
-- Colleges, universities, TVET colleges and corporate bursary/training programmes pay a **sponsorship fee** to have their relevant courses surfaced when a learner's RIASEC profile and city match.
+- Colleges, universities, TVET colleges and corporate bursary/training programmes pay a **sponsorship fee** to have their relevant courses surfaced when a learner's RIASEC profile and province match.
 - Sponsors get **awareness and top-of-mind positioning** with the exact audience they want (subject-relevant, geographically relevant, at the moment they're choosing a path) — not a database export.
 - This sidesteps the two biggest legal/reputational risks of the old lead-sale model: (a) POPIA exposure from transferring minors' personal data to third parties, and (b) the perception of "selling children's data," which would be a serious brand and legal liability in the SA market.
 - It also maps cleanly onto how large SA corporates already budget: **Skills Development spend under the B-BBEE scorecard** and **CSI/ESG education budgets** are both natural fits for "sponsor visibility to prospective students/apprentices," and are usually easier to unlock than a data-purchase line item.
 
 ### Pricing structure (proposed, to validate with first sponsors)
-| Tier | What's included | Suggested price |
-|---|---|---|
-| **City Sponsor** | 1 institution, up to 3 courses, shown to learners in one city | R5,000/month |
-| **National Sponsor** | Shown to all learners regardless of city | R20,000/month |
-| **Founding Sponsor** (first 5–10 sponsors) | Discounted rate, logo on marketing site, case-study collaboration | 50% off Year 1 |
+
+Billed **annually in advance** at a 20% discount to the monthly rate. Institutional buyers budget on annual cycles, and upfront cash is materially useful at this stage. A single shared placement tier per geography — exclusivity is deliberately not sold until it can be enforced in the matching logic. Delivery between comparably-matched sponsors is rotated (see `findSponsorMatch`), which is what makes the contractual floor honourable at all.
+
+| Tier | What's included | Annual | Monthly |
+|---|---|---|---|
+| **Faculty / single programme** | One faculty or programme, in one province — the pilot entry point | R18,000 | R1,875 |
+| **Provincial** | 1 institution, up to 3 courses, matched to learners in one province | R48,000 | R5,000 |
+| **National** | Matched to learners in all nine provinces | R192,000 | R20,000 |
+| **Founding Sponsor** (first 5–10 sponsors) | Rate held at renewal, first claim on province, logo on marketing site, case-study collaboration | List price | List price |
 
 These are starting hypotheses, not fixed — validate against what a marketing/recruitment department already spends per acquired student via other channels (open days, print, digital ads), which is typically far higher than these figures.
 
 ## 5. Market
 
-- ~1.6M learners are enrolled across Grades 10–12 in South Africa in any given year (DBE annual survey, order-of-magnitude).
+- **2,902,751 learners** were enrolled across Grades 10–12 in 2023 — 1,187,468 in Gr 10, 974,717 in Gr 11, 740,566 in Gr 12 (DBE, [School Realities 2023](https://www.education.gov.za/Portals/0/Documents/Publications/School%20Realities%20December%202023.pdf), Table 4, public + independent ordinary schools). *This corrects the ~1.6M figure previously carried here, which understated the market by roughly 45%; 1.6M is closer to a single grade cohort than to the full FET phase.*
+- Provincial split (Gr 10–12): KwaZulu-Natal 690,057 · Gauteng 538,883 · Limpopo 398,932 · Eastern Cape 383,404 · Mpumalanga 262,840 · Western Cape 240,134 · North West 176,927 · Free State 156,362 · Northern Cape 55,212. The three largest provinces hold 56% of the market.
+- Those learners sit across **8,949 secondary and combined schools** (Vula schools database, EMIS-derived).
+- Enrolment falls 38% between Grade 10 and Grade 12, so the addressable audience is heavily weighted toward the earlier grades — which is also where career guidance is most useful.
 - WhatsApp is used by the vast majority of SA smartphone owners across all income bands — it is the de facto national messaging layer, unlike app-based competitors.
 - No dominant, free, WhatsApp-native career guidance product currently exists at scale in SA; adjacent tools (career quiz websites, paid psychometric assessments, in-school programmes) require infrastructure most target learners don't reliably have.
 
@@ -69,7 +76,7 @@ Vula's structural advantage is distribution (WhatsApp) + personalisation (RIASEC
 
 ## 8. Go-To-Market (summary — see MARKETING_PLAN.md for detail)
 
-Launch city-first (Cape Town), recruit an initial cohort of "founding sponsors" from local universities, TVET colleges and corporate bursary programmes at a discounted rate in exchange for case studies, then expand city-by-city as sponsor coverage grows, always keeping the learner experience free and non-empty (never show a city with zero relevant sponsors as a dead end — fall back to national sponsors and generic career guidance).
+Launch province-first (Western Cape), recruit an initial cohort of "founding sponsors" from local universities, TVET colleges and corporate bursary programmes at list price — with a rate held at renewal, first claim on their province and case-study collaboration in place of a discount — then expand province-by-province as sponsor coverage grows, always keeping the learner experience free and non-empty (never show a province with zero relevant sponsors as a dead end — fall back to national sponsors and generic career guidance).
 
 ## 9. Team & Operations
 
@@ -86,7 +93,15 @@ Launch city-first (Cape Town), recruit an initial cohort of "founding sponsors" 
 
 **Revenue**: sponsor fees per the tiering above. Unit economics only work once Twilio's production messaging cost is known — track cost-per-completed-assessment closely once live, since it scales with usage and is currently the largest true cost driver.
 
-**Break-even logic**: a handful of sponsors (3–5 City Sponsors, or 1–2 National Sponsors) likely covers infrastructure + messaging costs at moderate learner volume; growth beyond that is what funds a part-time partnerships hire.
+**Break-even logic**: a handful of sponsors (3–5 Provincial, or 1 National) likely covers infrastructure + messaging costs at moderate learner volume; growth beyond that is what funds a part-time partnerships hire. Annual upfront billing means a single Provincial sponsor (R48,000) covers well over a year of current infrastructure cost on day one.
+
+**On exclusivity**: a Solo (exclusive) tier was priced and then withdrawn before going to market. Two reasons: nothing in `findSponsorMatch` enforces exclusivity, so it would have been a contractual promise the platform could not keep; and a high exclusive price anchored the whole rate card upward, making the entry tier read as a stripped-down option. Scarcity is instead carried by the founding-sponsor terms (first claim on a province). Revisit once there is delivery data and the matching logic can enforce it.
+
+**Delivery commitment**: Schedule A carries a Minimum Impression Floor scaled to the tier — **150** Faculty, **400** Provincial, **1,600** National learners reached (distinct people, not placement views) per 12-month term. Each tier therefore guarantees the same unit economics, **R120 per learner reached**, which is the number a recruitment budget is actually assessed on. A flat floor was rejected: it would have priced National at R1,280 per learner against Faculty's R120 for an identical guarantee. Falling short triggers a free term extension (§3.5). Founding sponsors additionally hold a 90-day exit right with pro-rata refund if fewer than a quarter of the floor is reached (§3.6) — chosen over a larger volume promise because Vula has no delivery history to forecast from, and a capped downside answers the pre-launch objection better than a guess would.
+
+**Sponsor capacity is the binding constraint**: rotation splits a finite pool, so every floor sold in a province is a claim on the same learners. At the base-case model a province supports roughly **7 provincial sponsors** competing for the same careers, or about **21** spread across non-overlapping faculty areas — diversity of sponsor mix roughly triples effective capacity. At the conservative case a province cannot support a single 400 floor, which is the real risk being carried. The `province_capacity` view reports committed floors against learners actually reached, and no province should be sold into once it reads TIGHT.
+
+**Deferred revenue note**: fees are collected upfront but earned across twelve months. Cash on hand will overstate earned revenue, and the make-good clause (agreement §3.5) can extend a term at no further charge, and the §3.6 exit right can refund an unexpired term — so track deferred revenue separately from cash rather than treating a signed annual fee as banked.
 
 ## 11. Risks & Mitigations
 

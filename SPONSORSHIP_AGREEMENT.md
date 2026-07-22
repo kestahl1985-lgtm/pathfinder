@@ -20,7 +20,7 @@ Vula and Sponsor are each a "**Party**" and together the "**Parties**".
 
 ## 1. Background
 
-1.1. Vula operates a free WhatsApp-based career-guidance service for South African high school learners, which generates a personalised career profile for each learner based on a RIASEC (interest-based) assessment.
+1.1. Vula operates a free WhatsApp-based career-guidance service, open to users in South Africa aged 12 and upwards with no upper age limit, which generates a personalised career profile for each user based on a RIASEC (interest-based) assessment.
 
 1.2. Vula does not sell or share personal information of learners with third parties. Instead, Vula offers institutions and organisations the ability to **sponsor visibility** of their courses, programmes, or opportunities to learners whose profile and location match, on the terms set out in this Agreement.
 
@@ -30,7 +30,7 @@ Vula and Sponsor are each a "**Party**" and together the "**Parties**".
 
 2.1. "**Sponsored Content**" means the institution name, course names, course descriptions, required subjects, duration, website, and contact details supplied by Sponsor and displayed to matching learners, as set out in Schedule A.
 
-2.2. "**Learner**" means an end user of the Vula WhatsApp service, being a South African high school learner.
+2.2. "**Learner**" means an end user of the Vula WhatsApp service, being any person in South Africa aged 12 or older who completes or engages with the assessment. The term is used for convenience and does not limit the service to persons enrolled at a school.
 
 2.3. "**Personal Information**" has the meaning given to it in the Protection of Personal Information Act 4 of 2013 ("**POPIA**").
 
@@ -40,13 +40,19 @@ Vula and Sponsor are each a "**Party**" and together the "**Parties**".
 
 ## 3. Scope of Sponsorship
 
-3.1. During the Sponsorship Term, Vula will display the Sponsored Content to Learners whose RIASEC profile and self-reported city match the criteria agreed in Schedule A (or nationally, if agreed).
+3.1. During the Sponsorship Term, Vula will display the Sponsored Content to Learners whose RIASEC profile and self-reported province match the criteria agreed in Schedule A (or nationally, if agreed).
 
 3.2. Placement occurs within the WhatsApp conversation when a matching Learner explores a relevant career, and/or in such other placement as agreed in Schedule A.
 
-3.3. **No guarantee of volume or outcome.** Vula does not guarantee any specific number of impressions, Learner contacts, applications, or enrolments arising from the Sponsorship. Matching is algorithmic (based on Learner interest profile and city) and depends on organic Learner volume, which Vula does not control or guarantee.
+3.3. **No guarantee of volume or outcome.** Vula does not guarantee any specific number of impressions, Learner contacts, applications, or enrolments arising from the Sponsorship. Matching is algorithmic (based on Learner interest profile and province) and depends on organic Learner volume, which Vula does not control or guarantee. Sponsor further acknowledges that other sponsors may match the same Learner, and that the Sponsored Content shown is the closest match to that Learner's profile — Vula does not guarantee any minimum share of placements.
 
 3.4. Vula retains full editorial discretion over the format, wording, and prominence of how Sponsored Content is displayed, provided it fairly represents the information supplied by Sponsor in Schedule A.
+
+3.4.1. **Placement rotation and province capacity.** Where more than one sponsor matches a Learner comparably, Vula rotates placement toward the sponsor who has reached fewer Learners in the preceding thirty (30) days, so that no sponsor is structurally excluded by having contracted later. Vula will not accept sponsorships in a province beyond the point at which the total Minimum Impression Floors committed in that province can reasonably be met.
+
+3.5. **Make-good on under-delivery.** Where Schedule A records a **Minimum Impression Floor**, and the Learners reached over the Sponsorship Term fall below that floor, Vula will extend the Sponsorship Term at no further charge until the floor is met, up to a maximum extension of six (6) months. Vula will report Learners reached to Sponsor at least quarterly. **Learners reached** means distinct individuals to whom Sponsored Content was displayed; where one Learner views Sponsored Content more than once, that counts once. This extension is Sponsor's sole and exclusive remedy for under-delivery and does not entitle Sponsor to a refund of any part of the Sponsorship Fee. Where Schedule A records no Minimum Impression Floor, clause 3.3 applies without qualification and no make-good is owed.
+
+3.6. **Early-term exit (founding sponsors).** Where Schedule A records Sponsor as a **Founding Sponsor**, Sponsor may terminate this Agreement on written notice given within fourteen (14) days of the ninetieth (90th) day of the Sponsorship Term if the Learners reached by that date are fewer than one quarter (25%) of the Minimum Impression Floor. On such termination Vula will refund the portion of the Sponsorship Fee attributable to the unexpired part of the Term, calculated pro rata on a daily basis, within thirty (30) days. This right is in addition to, and does not replace, the make-good in 3.5.
 
 ## 4. Sponsor Obligations
 
@@ -58,7 +64,7 @@ Vula and Sponsor are each a "**Party**" and together the "**Parties**".
 
 ## 5. Fees & Payment
 
-5.1. Sponsor shall pay the Sponsorship Fee set out in Schedule A, in the currency and on the schedule stated there (e.g. monthly in advance).
+5.1. Sponsor shall pay the Sponsorship Fee set out in Schedule A **annually in advance**, within the payment terms stated there, unless Schedule A expressly records a different billing frequency. The annual Sponsorship Fee is priced at a twenty percent (20%) discount to the equivalent monthly rate.
 
 5.2. All fees are exclusive of VAT unless stated otherwise. VAT shall be added at the applicable statutory rate where Vula is a registered VAT vendor.
 
@@ -141,12 +147,15 @@ Vula and Sponsor are each a "**Party**" and together the "**Parties**".
 | Sponsor legal name | \[__________\] |
 | Sponsor registration number | \[__________\] |
 | Sponsor contact person & email | \[__________\] |
-| Sponsorship tier | [ ] City Sponsor &nbsp;&nbsp; [ ] National Sponsor &nbsp;&nbsp; [ ] Founding Sponsor |
-| City/cities (if City Sponsor) | \[__________\] |
+| Sponsorship package | [ ] Faculty / single programme &nbsp;&nbsp; [ ] Provincial &nbsp;&nbsp; [ ] National |
+| Founding Sponsor | [ ] Yes (first 5–10 sponsors) &nbsp;&nbsp; [ ] No |
+| Province (if Provincial) | \[__________\] |
 | Institution/course(s) covered | \[__________\] |
-| Sponsorship Fee | R\[______\] per \[month/quarter/year\], excl. VAT |
-| Payment terms | \[e.g. monthly in advance, EFT within 7 days of invoice\] |
-| Sponsorship Term | \[______\] months, commencing \[**DATE**\] |
+| Sponsorship Fee | R\[______\] per year, excl. VAT (20% below the R\[______\] monthly rate) |
+| Payment terms | Annually in advance — EFT within \[**7**\] days of invoice |
+| Sponsorship Term | \[**12**\] months, commencing \[**DATE**\] |
+| Minimum Impression Floor (see 3.5) | \[______\] Learners reached over the Term &mdash; **150** Faculty · **400** Provincial · **1,600** National (R120 per Learner reached at every tier), or [ ] none agreed |
+| Founding Sponsor early-term exit (3.6) | [ ] Applies &nbsp;&nbsp; [ ] Does not apply |
 | Logo use on Vula marketing site | [ ] Yes &nbsp;&nbsp; [ ] No |
 | Notices — Vula | \[email/address\] |
 | Notices — Sponsor | \[email/address\] |

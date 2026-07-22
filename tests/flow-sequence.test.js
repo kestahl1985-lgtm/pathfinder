@@ -18,7 +18,7 @@
 
 const assert = require("assert");
 const path = require("path");
-const { advance, QUESTION_TRAITS } = require(path.join(__dirname, "..", "lib", "assessment.js"));
+const { advance, QUESTION_TRAITS, selectSponsor, ROTATION_BAND } = require(path.join(__dirname, "..", "lib", "assessment.js"));
 
 let testCount = 0;
 function check(name, fn) {
@@ -161,6 +161,99 @@ async function runOnboarding(s) {
     assert.strictEqual(QUESTION_TRAITS.length, 30);
     const expected = ["R", "I", "A", "S", "E", "C"];
     QUESTION_TRAITS.forEach((t, i) => assert.strictEqual(t, expected[i % 6], `trait drift at index ${i}`));
+  });
+
+  // ---- 9. Sponsor rotation (fairness contract for paying sponsors) ----
+  //
+  // Before rotation existed, findSponsorMatch kept only the strictly-highest
+  // scorer, so the first-loaded sponsor won 100% of impressions forever and
+  // any second sponsor in the same province received none while still paying.
+  // These assertions are the contract that fix depends on.
+  const cand = (id, score) => ({ score, course: { id }, college: { id: "col-" + id } });
+
+  await check("rotation: equally-scored sponsors alternate rather than one always winning", () => {
+    const a = cand("a", 20), b = cand("b", 20);
+    // nobody served yet -> deterministic first pick
+    const first = selectSponsor([a, b], {});
+    assert.ok(first, "no sponsor selected");
+    // once the first has an impression, the other must be served next
+    const second = selectSponsor([a, b], { [first.course.id]: 1 });
+    assert.notStrictEqual(second.course.id, first.course.id, "same sponsor served twice while the other had zero");
+  });
+
+  await check("rotation: least-served sponsor is chosen even when slightly lower scoring", () => {
+    // 14 vs 13 is the real-world case: same course tagged R:5,I:4 vs R:4,I:5
+    const picked = selectSponsor([cand("high", 14), cand("low", 13)], { high: 5, low: 0 });
+    assert.strictEqual(picked.course.id, "low", "starved sponsor not prioritised inside the relevance band");
+  });
+
+  await check("rotation: relevance is never traded away for fairness", () => {
+    // a weak match outside the band must not be served no matter how starved
+    const picked = selectSponsor([cand("strong", 20), cand("weak", 4)], { strong: 999, weak: 0 });
+    assert.strictEqual(picked.course.id, "strong", "a poor match was served purely for fairness");
+  });
+
+  await check("rotation: band boundary is inclusive and derived from ROTATION_BAND", () => {
+    const onEdge = 20 * ROTATION_BAND;
+    const picked = selectSponsor([cand("best", 20), cand("edge", onEdge)], { best: 3, edge: 0 });
+    assert.strictEqual(picked.course.id, "edge", "candidate exactly on the band boundary was excluded");
+  });
+
+  await check("rotation: ordering is deterministic, never dependent on row order", () => {
+    const a = cand("aaa", 20), b = cand("bbb", 20);
+    const forward = selectSponsor([a, b], {});
+    const reversed = selectSponsor([b, a], {});
+    assert.strictEqual(forward.course.id, reversed.course.id, "result changed when candidate order changed");
+  });
+
+  await check("rotation: a failed impression lookup degrades to score order, not a crash", () => {
+    const picked = selectSponsor([cand("hi", 20), cand("lo", 18)], {});
+    assert.strictEqual(picked.course.id, "hi", "empty counts should fall through to the better match");
+    assert.strictEqual(selectSponsor([], {}), null, "empty candidate list should return null");
+    assert.strictEqual(selectSponsor([cand("z", 0)], {}), null, "zero-score candidate should not be served");
+  });
+
+  await check("rotation: sustained delivery stays balanced across many impressions", () => {
+    const counts = { a: 0, b: 0, c: 0 };
+    const pool = [cand("a", 20), cand("b", 19), cand("c", 18)];
+    for (let i = 0; i < 300; i++) counts[selectSponsor(pool, counts).course.id] += 1;
+    const share = Object.values(counts);
+    const spread = Math.max(...share) - Math.min(...share);
+    assert.ok(spread <= 1, `delivery drifted apart by ${spread} (${JSON.stringify(counts)})`);
+    assert.ok(Math.min(...share) > 0, "a paying sponsor received zero impressions");
+  });
+
+  // ---- 10. In-WhatsApp INFO reply (keeps low-data learners inside the chat) ----
+  await check("INFO before any sponsor was shown gives a helpful reply, not a dead end", async () => {
+    const s = freshSession("t-info-empty");
+    await runOnboarding(s);
+    for (let i = 0; i < 30; i++) await advance(s, "2", "2");
+    const out = await advance(s, "INFO", "INFO");
+    const text = out.map((p) => p.text || "").join(" ");
+    assert.ok(text.length > 0, "INFO produced no reply");
+    assert.ok(!/undefined|null/i.test(text), "INFO leaked undefined/null into the reply");
+  });
+
+  await check("INFO is case-insensitive and never crashes the session", async () => {
+    for (const variant of ["info", "INFO", " Info ", "iNfO"]) {
+      const s = freshSession("t-info-" + variant.trim());
+      await runOnboarding(s);
+      for (let i = 0; i < 30; i++) await advance(s, "2", "2");
+      const before = s.step;
+      const out = await advance(s, variant, variant);
+      assert.ok(Array.isArray(out) && out.length > 0, `INFO variant "${variant}" returned nothing`);
+      assert.strictEqual(s.step, before, `INFO variant "${variant}" changed the session step`);
+    }
+  });
+
+  await check("INFO does not consume a valid career number", async () => {
+    const s = freshSession("t-info-number");
+    await runOnboarding(s);
+    for (let i = 0; i < 30; i++) await advance(s, "2", "2");
+    const out = await advance(s, "1", "1");
+    const text = out.map((p) => p.text || "").join(" ");
+    assert.strictEqual(s.step, "exploring", "picking career 1 did not enter exploring");
+    assert.ok(text.length > 0, "career detail was empty");
   });
 
   if (process.exitCode === 1) {

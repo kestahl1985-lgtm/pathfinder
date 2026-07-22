@@ -14,9 +14,9 @@
 
 Hi [Name],
 
-Quick one — I run Vula, a free WhatsApp career-guidance tool for Grade 10–12 learners across South Africa. Learners complete a 5-minute assessment and get a personalised career profile with matched paths, required subjects, and qualification routes.
+Quick one — I run Vula, a free WhatsApp career-guidance tool open to anyone in South Africa seeking career direction. They complete a 5-minute assessment and get a personalised career profile with matched paths, required subjects, and qualification routes.
 
-We're launching sponsor placements first in [Cape Town], and I think [University]'s [Faculty/Programme] would be a strong fit — we can surface it directly to learners whose interest profile matches, in the cities you recruit from, before they've locked in Grade 10/11 subject choices.
+We're launching sponsor placements at the end of August, starting in [Western Cape], and I think [University]'s [Faculty/Programme] would be a strong fit — we can surface it directly to people whose interest profile matches, in the provinces you recruit from, including learners before they've locked in subject choices.
 
 No database changes hands — you get visibility with the right audience, not a data export, which keeps this clean from a POPIA perspective on your side too.
 
@@ -28,7 +28,7 @@ vulacareers.co.za
 
 ### LinkedIn message
 
-Hi [Name] — I run Vula, a free WhatsApp career-guidance tool for SA Grade 10–12 learners (5-min assessment → career profile → matched subjects/qualifications). We're opening sponsor placements in [city] and think [University]'s [programme] would be a strong fit — reaching the right prospective students by interest and geography, without a data handover. Open to a quick call to show you the flow?
+Hi [Name] — I run Vula, a free WhatsApp career-guidance tool open to anyone seeking career direction (5-min assessment → career profile → matched qualifications). We're opening sponsor placements in [province] and think [University]'s [programme] would be a strong fit — reaching the right prospective students by interest and geography, without a data handover. Open to a quick call to show you the flow?
 
 ---
 
@@ -40,7 +40,7 @@ Hi [Name] — I run Vula, a free WhatsApp career-guidance tool for SA Grade 10�
 
 Hi [Name],
 
-I run Vula, a free WhatsApp career-guidance tool for SA high school learners — a 5-minute assessment that matches a learner to careers, required subjects, and qualification paths.
+I run Vula, a free WhatsApp career-guidance tool open to anyone in South Africa seeking career direction — a 5-minute assessment that matches someone to careers, required subjects, and qualification paths.
 
 I think there's a clean fit with [Company]'s [bursary/learnership programme name]: we can surface it directly to learners whose profile matches the fields you fund, at the point they're actually choosing a direction — not after they've already ruled themselves out by picking the wrong subjects in Grade 10.
 
@@ -66,7 +66,7 @@ Hi [Name] — I run Vula, a free WhatsApp career-guidance tool for SA high schoo
 
 Hi [Name],
 
-I run Vula — a free WhatsApp tool that helps Grade 10–12 learners figure out which career paths actually fit them, in about 5 minutes, no app needed.
+I run Vula — a free WhatsApp tool that helps anyone figure out which career paths actually fit them, in about 5 minutes, no app needed.
 
 A lot of learners default to "university or nothing" simply because nobody tells them about artisan and trade pathways early enough. Vula's assessment naturally surfaces TVET options to learners whose profile is hands-on/practical — which is exactly the audience [College] wants and often struggles to reach with a typical marketing budget.
 

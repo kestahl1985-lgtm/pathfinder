@@ -1,0 +1,392 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Vula Careers — Sponsor One-Pager</title>
+<style>
+  :root{
+    --ink:#0a0f24;
+    --navy:#070b1a;
+    --brand:#6d5efc;
+    --brand-2:#14b8d4;
+    --lime:#b6f400;
+    --muted:#5b6480;
+    --line:#e3e7f2;
+    --soft:#f5f7fc;
+  }
+
+  @page { size: A4; margin: 10mm 14mm 7mm 14mm; }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    font-size:9.6pt;
+    line-height:1.5;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  h1,h2,h3,.display{ font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif; letter-spacing:-0.02em; margin:0; }
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    display:flex; align-items:center; gap:11px;
+    padding-bottom:8px; margin-bottom:10px;
+    border-bottom:2px solid var(--navy);
+  }
+  .mark{ width:28px; height:28px; flex:0 0 28px; }
+  .wordmark{ font-size:16pt; font-weight:800; letter-spacing:-0.03em; }
+  .masthead .tag{
+    margin-left:auto; text-align:right;
+    font-size:7.4pt; color:var(--muted); line-height:1.45;
+    text-transform:uppercase; letter-spacing:0.09em; font-weight:600;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{ margin-bottom:8px; }
+  .hero h1{
+    font-size:16pt; font-weight:800; line-height:1.11;
+    max-width:15.5cm; margin-bottom:7px;
+  }
+  .hero h1 .accent{
+    background:linear-gradient(180deg,transparent 62%, var(--lime) 62%);
+    padding:0 2px;
+  }
+  .lede{ font-size:8.7pt; line-height:1.42; color:#242c48; max-width:17cm; }
+  .lede strong{ font-weight:800; color:var(--ink); }
+
+  /* ---------- Sections ---------- */
+  h2{
+    font-size:7.8pt; font-weight:800;
+    text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--brand);
+    margin:0 0 5px 0;
+  }
+  section{ margin-bottom:3px; }
+  p{ margin:0 0 4px 0; }
+
+  .cols{ display:flex; gap:15px; }
+  .cols > div{ flex:1; }
+
+  ul{ margin:0; padding:0; list-style:none; }
+  ul li{
+    position:relative; padding-left:13px; margin-bottom:2px;
+  }
+  ul li::before{
+    content:""; position:absolute; left:0; top:5.5px;
+    width:5px; height:5px; border-radius:50%; background:var(--lime);
+    border:1px solid #93c400;
+  }
+
+  /* ---------- Benefit grid ---------- */
+  .benefits{
+    display:grid; grid-template-columns:1fr 1fr; gap:5px;
+  }
+  /*b*/.benefit{
+    background:var(--soft);
+    border:1px solid var(--line);
+    border-left:2.5px solid var(--brand);
+    border-radius:5px;
+    padding:3px 8px;
+  }
+  .benefit b{ display:block; font-size:9.2pt; font-weight:800; margin-bottom:1px; }
+  .benefit span{ color:var(--muted); font-size:8.4pt; line-height:1.38; display:block; }
+
+  /* ---------- Pricing ---------- */
+  table{ width:100%; border-collapse:collapse; }
+  thead th{
+    background:var(--navy); color:#fff;
+    font-size:7.4pt; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.1em;
+    text-align:left; padding:6px 9px;
+  }
+  thead th:last-child{ text-align:right; }
+  tbody td{
+    padding:2px 8px; border-bottom:1px solid var(--line);
+    vertical-align:top; font-size:9pt;
+  }
+  tbody td:first-child{ font-weight:800; white-space:nowrap; }
+  tbody td:last-child{
+    text-align:right; white-space:nowrap; font-weight:800; font-size:9.6pt;
+  }
+  tbody tr.founding td{ background:#fbffe8; }
+  tbody tr.founding td:first-child{ color:#5a7a00; }
+  .rowsub{ display:block; font-weight:600; font-size:7.6pt; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; }
+  td.solo{ background:#f3f1ff; color:#3d2fb8; }
+  .annualnote{ font-size:8.2pt; color:#242c48; margin:0 0 2px 0; }
+  .annualnote b{ color:var(--ink); }
+  .sharedsolo{ font-size:7.7pt; color:#242c48; margin-top:3px; line-height:1.45; }
+  .sharedsolo b{ color:var(--ink); }
+  .fine{ font-size:7.6pt; color:var(--muted); margin-top:3px; line-height:1.45; }
+
+  /* ---------- Risk callout ---------- */
+  .callout{
+    background:var(--navy); color:#fff;
+    border-radius:6px; padding:7px 10px;
+    display:flex; gap:11px; align-items:flex-start;
+  }
+  .callout .bar{ width:3px; align-self:stretch; background:var(--lime); border-radius:2px; flex:0 0 3px; }
+  .callout h3{ font-size:9.4pt; font-weight:800; margin-bottom:3px; color:var(--lime); }
+  .callout p{ margin:0; font-size:8.2pt; line-height:1.4; color:#cfd5e8; }
+
+  /* ---------- Steps ---------- */
+  .steps{ display:flex; gap:8px; }
+  .step{ flex:1; border-top:2px solid var(--line); padding-top:5px; }
+  .step .n{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:15px; height:15px; border-radius:50%;
+    background:var(--brand); color:#fff;
+    font-size:7.6pt; font-weight:800; margin-bottom:3px;
+  }
+  .step b{ display:block; font-size:8.9pt; font-weight:800; margin-bottom:1px; }
+  .step span{ font-size:7.8pt; color:var(--muted); line-height:1.32; display:block; }
+
+  /* ---------- Page 2 ---------- */
+  .pagebreak{ page-break-before:always; }
+  .p2head{ display:flex; align-items:baseline; gap:9px; margin-bottom:9px; padding-bottom:7px; border-bottom:2px solid var(--navy); }
+  .p2head h1{ font-size:15pt; font-weight:800; }
+  .p2head .sub{ margin-left:auto; font-size:7.4pt; color:var(--muted); text-transform:uppercase; letter-spacing:0.09em; font-weight:600; }
+  .bignum{ display:flex; gap:9px; margin-bottom:9px; }
+  .bignum div{ flex:1; background:var(--soft); border:1px solid var(--line); border-left:2.5px solid var(--brand); border-radius:5px; padding:7px 9px; }
+  .bignum b{ display:block; font-size:15pt; font-weight:800; letter-spacing:-0.02em; line-height:1.1; }
+  .bignum span{ display:block; font-size:8.2pt; color:var(--muted); line-height:1.4; margin-top:2px; }
+  table.mkt td{ font-size:9.2pt; }
+  table.mkt td.n, table.mkt th.n{ text-align:right; }
+  table.mkt tr.tot td{ font-weight:800; background:#f5f7fc; border-top:1.5px solid var(--navy); }
+  table.mkt tr.tot td:first-child{ color:var(--ink); }
+  .mktbar{ display:inline-block; height:7px; border-radius:2px; background:var(--brand); opacity:.85; vertical-align:middle; }
+  .note{ background:var(--navy); color:#fff; border-radius:6px; padding:8px 10px; margin-top:9px; }
+  .note b{ color:var(--lime); font-size:9.2pt; display:block; margin-bottom:3px; }
+  .note p{ margin:0; font-size:8.6pt; line-height:1.5; color:#cfd5e8; }
+  .src{ font-size:7.5pt; color:var(--muted); line-height:1.45; margin-top:7px; }
+  .src a{ color:var(--brand); }
+
+  /* ---------- Page 2 blocks ---------- */
+  h2.p2{ margin-top:9px; }
+  .lead2{ font-size:8.4pt; color:#242c48; line-height:1.46; margin:0 0 5px 0; }
+  table.be td, table.be th{ font-size:8.5pt; }
+  table.be td.n, table.be th.n{ text-align:center; }
+  table.be td.n{ font-weight:800; font-size:10pt; color:var(--brand); }
+  table.be td.pk{ font-weight:800; white-space:nowrap; }
+  table.be td.pk span{ display:block; font-weight:600; font-size:7.6pt; color:var(--muted); letter-spacing:0.04em; }
+  table.be thead th.n{ font-size:7.2pt; }
+  .impact{ display:flex; gap:8px; margin-top:6px; }
+  .impact div{ flex:1; background:var(--navy); color:#fff; border-radius:5px; padding:7px 9px; }
+  .impact b{ display:block; font-size:15pt; font-weight:800; color:var(--lime); line-height:1.05; letter-spacing:-0.02em; }
+  .impact span{ display:block; font-size:7.9pt; line-height:1.4; color:#cfd5e8; margin-top:3px; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top:7px; padding-top:6px;
+    border-top:1px solid var(--line);
+    display:flex; align-items:center; gap:9px;
+    font-size:7.8pt; color:var(--muted);
+  }
+  footer .qr{ width:31px; height:31px; flex:0 0 31px; }
+  footer .qrtext b, footer .contact b{
+    display:block; font-size:8pt; font-weight:800; color:var(--ink);
+    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1px;
+  }
+  footer .qrtext span, footer .contact span{ display:block; font-size:7.7pt; line-height:1.4; }
+  footer .contact{ margin-left:auto; text-align:right; }
+  footer .contact span{ color:var(--brand); font-weight:700; }
+  footer .contact .reg{ color:var(--muted); font-weight:400; margin-top:1px; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <svg class="mark" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#14b8d4"/>
+        <stop offset="0.55" stop-color="#6d5efc"/>
+        <stop offset="1" stop-color="#9b6cff"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="120" height="120" rx="28" fill="url(#g)"/>
+    <circle cx="60" cy="92" r="7" fill="#ffffff"/>
+    <path d="M60 90 C54 70 45 53 41 39" stroke="#ffffff" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <circle cx="41" cy="35" r="7" fill="#ffffff"/>
+    <path d="M60 90 C66 70 75 53 79 39" stroke="#b6f400" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <circle cx="79" cy="34" r="9.5" fill="#b6f400"/>
+  </svg>
+  <div class="wordmark">Vula</div>
+  <div class="tag">Sponsor One-Pager<br>Career Guidance on WhatsApp</div>
+</div>
+
+<div class="hero">
+  <h1>Reach the right students, <span class="accent">before they've made up their mind.</span></h1>
+  <p class="lede"><strong>Vula</strong> is a free, WhatsApp-native career-guidance tool for South African Grade 10–12 learners. In under 5 minutes, a learner answers 30 tappable questions and gets a personalised career profile, a downloadable PDF report, and — where relevant — sees your courses surfaced as the match for their interests and province.</p>
+</div>
+
+<div class="cols">
+  <section style="flex:1.15">
+    <h2>The problem you already know</h2>
+    <p>Most SA schools have one career counsellor for hundreds of learners, if any at all. Learners lock in Grade 9/10 subject choices with almost no real information about what those choices open or close off.</p>
+    <p>By the time your recruitment team reaches them in Grade 12, many have already ruled themselves out of your programmes without realising it.</p>
+  </section>
+  <section style="flex:1">
+    <h2>How it works for you</h2>
+    <ul>
+      <li>A learner completes their profile on WhatsApp — no app, no login, works on any phone.</li>
+      <li>If their RIASEC profile and province match your programme, your course is surfaced directly inside their results.</li>
+      <li>You reach prospective students by genuine interest fit and geography — not by buying a generic list and hoping it lands.</li>
+    </ul>
+  </section>
+</div>
+
+<section>
+  <h2>What you get</h2>
+  <div class="benefits">
+    <div class="benefit"><b>Targeted placement</b><span>Shown only to learners whose profile and province actually match your programme.</span></div>
+    <div class="benefit"><b>Zero data risk</b><span>Vula never hands you a learner's personal information — no database to secure, no POPIA exposure on your side.</span></div>
+    <div class="benefit"><b>Brand presence</b><span>Your name and course details in front of learners at the decision point, not after.</span></div>
+    <div class="benefit"><b>Simple reporting</b><span>Impression counts per course, so you can see reach without ever touching learner-level data.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Pricing</h2>
+  <p class="annualnote">Billed annually &mdash; <b>pay for ten months, get twelve.</b></p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:19%">Package</th>
+        <th>Reach</th>
+        <th style="width:20%">Shared slot</th>
+        <th style="width:22%">Solo &mdash; you own it</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Provincial</td>
+        <td>Learners in one province</td>
+        <td>R65,000<span class="rowsub">per year &middot; R6,500/mo</span></td>
+        <td class="solo">R180,000<span class="rowsub">per year &middot; R18,000/mo</span></td>
+      </tr>
+      <tr>
+        <td>National</td>
+        <td>Learners in all nine provinces</td>
+        <td>R250,000<span class="rowsub">per year &middot; R25,000/mo</span></td>
+        <td class="solo">R700,000<span class="rowsub">per year &middot; R70,000/mo</span></td>
+      </tr>
+      <tr class="founding">
+        <td>Founding Sponsor<span class="rowsub">First 5&ndash;10 only</span></td>
+        <td>Any package above, plus logo placement on the Vula marketing site and first right of refusal on a joint case study</td>
+        <td colspan="2" style="text-align:right">50% off<span class="rowsub">Year 1</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="sharedsolo"><b>Shared</b> &mdash; matched by interest profile; where another sponsor also matches, the closer match is shown. Annual shared sponsors get an impression floor &mdash; fall short and your term extends free. &nbsp;<b>Solo</b> &mdash; no other sponsor is shown to any learner in your province (or nationwide) for the term.</p>
+  <p class="fine">Excl. VAT, payable annually in advance; monthly rates shown for comparison. Compare against your current cost-per-acquired-student via open days, print, or digital ads — sponsorship typically undercuts all three.</p>
+</section>
+
+<section>
+  <div class="callout">
+    <div class="bar"></div>
+    <div>
+      <h3>Why this is lower-risk than a data buy</h3>
+      <p>Vula's model is sponsorship, not lead sales — deliberately. You get visibility with the right audience without becoming a second custodian of minors' personal information. That's a POPIA exposure most institutions would rather not take on, and Vula's structure means you never have to.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>How to get started</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><b>See it live</b><span>15-minute call or live demo of the WhatsApp flow, end to end.</span></div>
+    <div class="step"><span class="n">2</span><b>Pick your package</b><span>Provincial or national, shared or solo.</span></div>
+    <div class="step"><span class="n">3</span><b>Sign</b><span>A short, standard sponsorship agreement, attorney-reviewed before use.</span></div>
+    <div class="step"><span class="n">4</span><b>Go live</b><span>Your courses start showing to matching learners within days of signing.</span></div>
+  </div>
+</section>
+
+<footer>
+  <img class="qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQ4AAAEOCAIAAAD3027yAAAEnUlEQVR4nO3dMZLbOBRAwZmtDRT4Bnv/o/kGDpRxU0f0q4JggGR36rEsjfUKwSeA7+M4voA/+eePPwFIBSqpQCIVSKQCiVQgkQokUoFEKpD8e/7Hrx//fd3L+9fPSZ/3/JVHnL+ref/uudfDvhtWFUikAolUIJEKJFKBRCqQSAUSqUAiFfjEtP7cqjnxqinyqs878oTBvL/7tO+GVQUSqUAiFUikAolUIJEKJFKBRCqQSAXmT+ufNjVf9Yn2nMc/7bthVYFEKpBIBRKpQCIVSKQCiVQgkQokUoHV0/orGpn1zpupj7jiLH9PVhVIpAKJVCCRCiRSgUQqkEgFEqlAIhVITOv/0vR6ZB5var4DqwokUoFEKpBIBRKpQCIVSKQCiVQgkQqsntZfcca8aif6+Svf73b59wW/G1YVSKQCiVQgkQokUoFEKpBIBRKpQCIVmD+tn3d++yp73hB/xVvtX7f7blhVIJEKJFKBRCqQSAUSqUAiFUikAolUIPk+jqP9JDe8Xd699Z1VBRKpQCIVSKQCiVQgkQokUoFEKpBIBT4xrbf3+u9M3Edeec8nDM7NOw9gxPm/a1WBRCqQSAUSqUAiFUikAolUIJEKJFKB1ffW329H+Lzb5UdeecS8ufhr0d89N/LdsKpAIhVIpAKJVCCRCiRSgUQqkEgFEqnA6nvr503Nr3iP+/329L8u+DTGyCtbVSCRCiRSgUQqkEgFEqlAIhVIpAKJVGD+tH7Ps9/33C8+YtVpAVecuM9jVYFEKpBIBRKpQCIVSKQCiVQgkQokUoHVJ+HPO/v9aXu+51l1/sGeTyecs6pAIhVIpAKJVCCRCiRSgUQqkEgFEqlA8n0cx+Wm5iPudzL8PPb0/86qAolUIJEKJFKBRCqQSAUSqUAiFUikAvOn9SPmnVf/tHd1bs/nLV6LfpPn3FsPHyAVSKQCiVQgkQokUoFEKpBIBRKpwN731q96DmBPq06knzfLP3fFV7aqQCIVSKQCiVQgkQokUoFEKpBIBRKpwOqT8Fe533u+4nkAI1bN8s9ZVSCRCiRSgUQqkEgFEqlAIhVIpAKJVOATe+v3nG2fu98J7SNWnXV/v9+zVQUSqUAiFUikAolUIJEKJFKBRCqQSAU+Ma2/4lT13MgEetX98Xt6LfpEq/4XrCqQSAUSqUAiFUikAolUIJEKJFKBRCqw+t76VeY9YbDnefWrTsJ/P+x/36oCiVQgkQokUoFEKpBIBRKpQCIVSKQC86f15+43J37aXPyKJyu8p/2urCqQSAUSqUAiFUikAolUIJEKJFKBRCqwelrPp85gX/UcwLwd//PMe89WFUikAolUIJEKJFKBRCqQSAUSqUAiFUhM67eYmj/tJPzXBXftW1UgkQokUoFEKpBIBRKpQCIVSKQCiVRg9bR+z3vN9/xEIzvv93zPI1Y9f3DOqgKJVCCRCiRSgUQqkEgFEqlAIhVIpALzp/VX3CG95wR6z3PjR6bm72k771ft6beqQCIVSKQCiVQgkQokUoFEKpBIBRKpQPJ9HEf7SXg0qwokUoFEKpBIBRKpQCIVSKQCiVQgkQp8Ff8DdU2VwFyfEx4AAAAASUVORK5CYII=" alt="QR code to vulacareers.co.za">
+  <div class="qrtext"><b>See how Vula works</b><span>Scan for the learner walkthrough and a live demo booking.</span></div>
+  <div class="contact">
+    <b>Get started</b>
+    <span>hello@vulacareers.co.za &nbsp;·&nbsp; vulacareers.co.za</span>
+    <span class="reg">Vula Career Guide (Pty) Ltd · Reg. 2026/021440/07</span>
+  </div>
+</footer>
+
+
+<div class="pagebreak"></div>
+
+<div class="p2head">
+  <h1>The audience, by province</h1>
+  <div class="sub">Vula &mdash; sponsor one-pager<br>Market data</div>
+</div>
+
+<div class="bignum">
+  <div><b>2,902,751</b><span>learners in Grades 10&ndash;12 nationally &mdash; the window in which subject choices harden into career options</span></div>
+  <div><b>8,949</b><span>secondary and combined schools those learners sit across</span></div>
+  <div><b>38%</b><span>fewer learners in Grade 12 than Grade 10 &mdash; the audience is weighted to the earlier grades</span></div>
+</div>
+
+<table class="mkt">
+  <thead>
+    <tr><th style="width:23%">Province</th><th class="n" style="width:17%">Gr 10&ndash;12 learners</th><th style="width:26%"></th><th class="n" style="width:13%">Share</th><th class="n" style="width:21%">Schools</th></tr>
+  </thead>
+  <tbody>
+      <tr><td>KwaZulu-Natal</td><td class="n">690,057</td><td><span class="mktbar" style="width:100.0%"></span></td><td class="n">23.8%</td><td class="n">2,108</td></tr>
+      <tr><td>Gauteng</td><td class="n">538,883</td><td><span class="mktbar" style="width:78.2%"></span></td><td class="n">18.6%</td><td class="n">1,465</td></tr>
+      <tr><td>Limpopo</td><td class="n">398,932</td><td><span class="mktbar" style="width:57.6%"></span></td><td class="n">13.7%</td><td class="n">1,406</td></tr>
+      <tr><td>Eastern Cape</td><td class="n">383,404</td><td><span class="mktbar" style="width:55.5%"></span></td><td class="n">13.2%</td><td class="n">1,589</td></tr>
+      <tr><td>Mpumalanga</td><td class="n">262,840</td><td><span class="mktbar" style="width:38.2%"></span></td><td class="n">9.1%</td><td class="n">713</td></tr>
+      <tr><td>Western Cape</td><td class="n">240,134</td><td><span class="mktbar" style="width:34.9%"></span></td><td class="n">8.3%</td><td class="n">607</td></tr>
+      <tr><td>North West</td><td class="n">176,927</td><td><span class="mktbar" style="width:25.6%"></span></td><td class="n">6.1%</td><td class="n">522</td></tr>
+      <tr><td>Free State</td><td class="n">156,362</td><td><span class="mktbar" style="width:22.7%"></span></td><td class="n">5.4%</td><td class="n">382</td></tr>
+      <tr><td>Northern Cape</td><td class="n">55,212</td><td><span class="mktbar" style="width:8.0%"></span></td><td class="n">1.9%</td><td class="n">157</td></tr>
+    <tr class="tot"><td>South Africa</td><td class="n">2,902,751</td><td></td><td class="n">100%</td><td class="n">8,949</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <b>These are enrolment figures, not Vula's audience.</b>
+  <p>They describe how large the addressable market is in each province. Vula is pre-launch and its own reach is currently the waitlist. Sponsor reporting shows impressions actually delivered to real learners &mdash; never market size.</p>
+</div>
+
+<p class="src">Learner figures: Department of Basic Education, <b>School Realities 2023</b> (published December 2023), Table 4 &mdash; ordinary public and independent schools, Grades 10&ndash;12; the most recent national dataset. Provincial figures sum exactly to the published national total of 2,902,751. School counts: Vula schools database (EMIS-derived).</p>
+
+
+<h2 class="p2">What it would take to pay for itself</h2>
+<p class="lead2">Sponsorship is a fixed annual cost, so break-even is simply your own cost per acquired student &mdash; a number you already know and we don't. Below is what each package would need to return over a year to cost you nothing. Find your column.</p>
+
+<table class="be">
+  <thead>
+    <tr>
+      <th style="width:31%">Package</th>
+      <th class="n">If a student costs you<br>R3,000 to acquire</th>
+      <th class="n">R7,500</th>
+      <th class="n">R15,000</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="pk">Provincial &mdash; shared<span>R65,000/yr</span></td><td class="n">22</td><td class="n">9</td><td class="n">5</td></tr>
+    <tr><td class="pk">Provincial &mdash; solo<span>R180,000/yr</span></td><td class="n">60</td><td class="n">24</td><td class="n">12</td></tr>
+    <tr><td class="pk">National &mdash; shared<span>R250,000/yr</span></td><td class="n">84</td><td class="n">34</td><td class="n">17</td></tr>
+    <tr><td class="pk">National &mdash; solo<span>R700,000/yr</span></td><td class="n">234</td><td class="n">94</td><td class="n">47</td></tr>
+  </tbody>
+</table>
+<p class="src" style="margin-top:5px">Enrolments needed = annual fee &divide; your cost per acquired student, rounded up. Vula makes no forecast of how many enrolments a sponsorship will produce &mdash; this table sets the bar your own economics imply, nothing more.</p>
+
+<h2 class="p2">What the learners are choosing into</h2>
+<div class="impact">
+  <div><b>60.9%</b><span>of South Africans aged 15&ndash;24 are unemployed &mdash; Stats SA, Q1 2026</span></div>
+  <div><b>10.1%</b><span>absorption rate for that age group: the share actually in work</span></div>
+  <div><b>2.9m</b><span>learners picking subjects that open or close those doors years early</span></div>
+</div>
+<p class="lead2" style="margin-top:6px">Vula is free to every learner, permanently &mdash; no app, no data cost, no fee. Sponsorship is what pays for that. A sponsor funds career guidance for learners whose schools cannot provide it, and reaches the ones whose interests genuinely fit their programmes. Those are the same act, which is the point of the model.</p>
+
+<footer>
+  <div class="qrtext"><b>Vula Career Guide (Pty) Ltd</b><span>Reg. 2026/021440/07</span></div>
+  <div class="contact"><b>Get started</b><span>hello@vulacareers.co.za &nbsp;&middot;&nbsp; vulacareers.co.za</span></div>
+</footer>
+
+</body>
+</html>
