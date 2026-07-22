@@ -222,6 +222,31 @@ since this is the fastest-moving fact in the whole document.
 
 ---
 
+
+### Millwright
+- RIASEC: Realistic
+- Subjects: N2 with four trade-relevant subjects. Minimum Grade 9 (NQF 1) and age 16, but employers commonly prefer Grade 12 with solid Mathematics and Physical Sciences.
+- Pathway: N1-N3 at TVET → apprenticeship/learnership (~3yr, classroom + workplace) → Trade Test (EISA) → qualified artisan. Dual electrical **and** mechanical trade, which is why it's in high demand.
+- Body: merSETA/CETA-accredited providers; trade test at an accredited Trade Test Centre
+- Confidence: High on pathway; **Medium on subject levels — employer and college minimums differ, verify with the specific college**
+- AI Impact: **Low** — hands-on installation, fault-finding and maintenance on physical plant.
+
+### Mine Surveyor
+- RIASEC: Realistic (+Investigative)
+- Subjects: APS 23, English 4 (50%), Mathematics **or** Technical Mathematics 5 (60%), Physical Science **or** Technical Science 5 (60%) [UJ, Bachelor of Mine Surveying]
+- Pathway: Bachelor of Mine Surveying → PLATO stage 2 → Mine Surveyor's Certificate of Competency (requires a blasting certificate plus a set number of practical underground shifts)
+- Body: PLATO; the Minerals Council of South Africa administers the competency exams
+- Confidence: High (UJ published requirements + Minerals Council)
+- AI Impact: **Low-Medium** — drone/LiDAR capture is automating survey data collection, but statutory sign-off and underground practical work stay with a certificated human.
+
+### Solar PV Installer
+- RIASEC: Realistic
+- Subjects: **No formal entry requirement set by SAPVIA.** The course assumes NQF 4-level numeracy. In practice the full GreenCard route expects qualified-electrician status.
+- Pathway: Electrical trade route (N1-N3 + apprenticeship + trade test) → 5-day PV installation course → 2-day theory + practical assessment (**80% to pass**) → SAPVIA PV GreenCard
+- Body: SAPVIA (PV GreenCard); Department of Labour registration as an electrician
+- Confidence: High on the GreenCard process; **Medium on whether electrician registration is mandatory for every installer role — confirm with SAPVIA**
+- AI Impact: **Low** — physical installation work, in one of the fastest-growing energy sectors in SA.
+
 ## Sector 2: Curious / Analytical (Investigative)
 
 ### Doctor (Medicine — MBChB)
@@ -322,6 +347,55 @@ since this is the fastest-moving fact in the whole document.
 
 ---
 
+
+### Dentist (BChD / BDS)
+- RIASEC: Investigative (+Realistic)
+- Subjects: English, Mathematics, Physical Sciences and/or Life Sciences, plus the best two other subjects. Selection uses **percentages, not symbols** — the five-subject average typically carries ~60% weighting in a composite index score.
+- Pathway: BChD/BDS (5yr) → community service → HPCSA registration. **NBT required.** Most schools also require a job-shadowing certificate (commonly min 16 hours observing a dentist/dental therapist/oral hygienist).
+- Body: HPCSA
+- Confidence: High on structure (UP, Wits, SMU published); **Medium on exact cut-offs — entry is highly competitive and varies by university and year**
+- AI Impact: **Low** — hands-on clinical procedures; AI assists imaging and diagnosis rather than replacing the physical work.
+
+### Optometrist
+- RIASEC: Investigative (+Social)
+- Subjects: NSC with university endorsement; strong Physical Sciences, Life Sciences and Mathematics; English at least Level 4. APS typically 26-30+ depending on institution.
+- Pathway: BOptom (4yr) → HPCSA registration. Optional additional year of advanced clinical training to specialise.
+- Body: HPCSA — Professional Board for Optometry and Dispensing Opticians
+- Confidence: **Medium-High — APS and subject levels vary meaningfully between UJ, UKZN, UL and UFS; check the specific institution**
+- AI Impact: **Low-Medium** — automated refraction and AI retinal screening are advancing, but diagnosis, dispensing and patient management remain professional acts.
+
+### Radiographer (Diagnostic)
+- RIASEC: Investigative (+Realistic/Social)
+- Subjects: APS 31, English 5 (60%), Mathematics 4 (50%), Physical Sciences 4 (50%), Life Sciences 5 (60%) [UJ]
+- Pathway: Bachelor of Diagnostic Radiography (4yr) or diploma route → clinical outcomes per the HPCSA's PBRCT → HPCSA registration
+- Body: HPCSA — Professional Board for Radiography and Clinical Technology
+- Confidence: High (UJ and CUT published requirements)
+- AI Impact: **Medium** — AI image *analysis* is advancing quickly in radiology, but image acquisition, patient positioning and radiation safety stay hands-on.
+
+### Chemical Engineer
+- RIASEC: Investigative (+Realistic)
+- Subjects: APS ~30, English 4 (50%), Mathematics 5 (60%), Physical Sciences 5 (60%) [UJ BEngTech]. Research universities (Wits, UCT, Stellenbosch) require notably higher.
+- Pathway: BEng (4yr, ECSA-accredited) or BEngTech → candidate phase → ECSA registration as PrEng or Professional Engineering Technologist
+- Body: ECSA
+- Confidence: High
+- AI Impact: **Medium** — process simulation and optimisation are increasingly AI-assisted, but plant safety accountability stays with a registered engineer.
+
+### Industrial Engineer
+- RIASEC: Investigative (+Enterprising/Conventional)
+- Subjects: As per other engineering disciplines — Mathematics and Physical Sciences at 60%+ is the typical steer.
+- Pathway: BEng/BEngTech Industrial Engineering → candidate phase → ECSA registration
+- Body: ECSA
+- Confidence: **Medium — ECSA discipline guide confirms the field, but per-university subject minimums were not individually verified here**
+- AI Impact: **Medium** — scheduling and optimisation are prime AI application areas, but systems design and change management stay human-led.
+
+### Cybersecurity Specialist
+- RIASEC: Investigative (+Conventional)
+- Subjects: **No universal requirement.** Matric (NSC) is enough for most certificate routes; Mathematics/CAT/IT are recommended but generally not compulsory. Degree routes want a good Mathematics pass.
+- Pathway: Genuinely multiple — (a) certificate/diploma at NQF 4-5, (b) an IT degree, (c) vendor certifications (CompTIA Security+, CEH, CISSP) usually entered *from* an existing IT role. Common stepping stones: IT support → junior security analyst → network administrator.
+- Body: No statutory SA body; industry/vendor certification dominates
+- Confidence: **Medium — the variety of entry routes is real (and a strength for accessibility), but it means there is no single correct answer to give a learner**
+- AI Impact: **Medium** — AI both automates routine threat detection and widens the attack surface; demand is growing strongly either way.
+
 ## Sector 3: Creative / Expressive (Artistic)
 
 **Overarching finding for this whole sector:** almost none of these careers have
@@ -413,6 +487,24 @@ piece.
 - AI Impact: **Medium** — AI increasingly assists routine asset generation and in-betweening in animation pipelines, but creative direction, game design judgment, and narrative craft stay human-led.
 
 ---
+
+
+### Sound Engineer / Audio Production
+- RIASEC: Artistic (+Realistic)
+- Subjects: Grade 10 or Grade 12 depending on provider. Some require a minimum 33.3% for English on an unendorsed Senior Certificate; entry assessments are common.
+- Pathway: Higher Certificate or Diploma in Audio Technology / Sound Engineering (Academy of Sound Engineering, Cape Audio College, SAE Institute, Oakfields, Damelin). **Few degree options exist in SA — the diploma is the norm.** Vendor certs (Pro Tools, Ableton Live, Dolby Atmos) add real employability.
+- Body: No statutory body
+- Confidence: **Medium-High on providers and entry; the sector has little formal standardisation, so requirements differ per college**
+- AI Impact: **Medium** — AI mixing and mastering tools are improving fast, but live sound, studio judgement and client relationships remain human.
+
+### Hairdresser / Cosmetologist
+- RIASEC: Artistic (+Social/Realistic)
+- Subjects: **Grade 9 (NQF 1) minimum for hairdressing — no specific subject requirements.**
+- Pathway: NQF 2-4 National Certificate at a TVET college (Level 2 ~18 months full-time) **or** the 3-year Occupational Certificate: Hairdressing (launched by DHET in Oct 2023) combining theory with a minimum two days per week of workplace practice → EISA trade test → certified hairdresser. RPL is available for people already working in the trade.
+- Body: Services SETA; EISA via an accredited assessment centre
+- Confidence: High (DHET launch announcement + TVET college published requirements)
+- AI Impact: **Low** — physical, in-person personal-service work.
+- **Accessible route** — one of the few skilled, certifiable trades reachable from Grade 9.
 
 ## Sector 4: Caring / People-focused (Social)
 
@@ -514,6 +606,49 @@ piece.
 
 ---
 
+
+### Enrolled Nurse / Auxiliary Nurse
+- RIASEC: Social
+- Subjects: Grade 12 for the Diploma and Degree routes. **The Higher Certificate (Auxiliary Nursing) has notably lower entry requirements.**
+- Pathway: Three distinct tiers — (1) **1-year Higher Certificate → Auxiliary Nurse**, (2) 3-year Diploma → Enrolled/Staff Nurse, (3) 4-year Bachelor → Professional Nurse & Midwife. All must be completed at a SANC-accredited school and registered with SANC.
+- Body: SANC (South African Nursing Council)
+- Confidence: High on the qualification ladder; **Medium on per-school subject minimums**
+- AI Impact: **Low** — hands-on patient care built on human presence.
+- **Accessible route, and an important one** — the 1-year Auxiliary certificate is the fastest entry into a *regulated* health profession and needs no degree. Worth surfacing to learners who assume healthcare means seven years of study.
+
+### Audiologist
+- RIASEC: Social (+Investigative)
+- Subjects: English (Home or First Additional) Level 4, Life Orientation Level 4, Mathematics Level 3, Life Sciences **or** Physical Sciences Level 3, minimum 30 APS excluding Life Orientation [UCT]
+- Pathway: 4-year Speech-Language Pathology & Audiology degree (**taught as a joint degree at most SA schools**) including ~400 supervised clinical hours → HPCSA registration → community service
+- Body: HPCSA — Professional Board for Speech, Language and Hearing
+- Confidence: High (UCT, SMU, UP published)
+- AI Impact: **Low** — diagnostic automation is growing, but rehabilitation and the patient relationship are central to the work.
+
+### Firefighter
+- RIASEC: Realistic (+Social)
+- Subjects: Matric (NSC) — **no specific subject requirements**
+- Pathway: Matric + valid driver's licence + age 18+ → municipal recruitment (written aptitude test, Physical Ability Test, panel interview, medical and psychological evaluation, background check) → Firefighter 1 & 2 certification at an accredited academy. First Aid/BLS is strongly advantageous; some services prefer an EMT/paramedic qualification.
+- Body: Municipal fire services; accredited training academies
+- Confidence: **Medium — requirements genuinely differ between municipalities (Cape Town, Johannesburg etc.). Verify with the specific city.**
+- AI Impact: **Low** — physical emergency response.
+
+### Police Officer (SAPS) / Correctional Services Officer (DCS)
+- RIASEC: Social (+Realistic/Conventional)
+- Subjects: Grade 12 (Matric) — **no specific subjects required**
+- Pathway: Must be an SA citizen or permanent resident, aged 18-35, no criminal record or pending cases, proficient in English plus one other official language, and pass medical, psychological and fitness assessments (including BMI and waist measurements) plus integrity vetting. No tattoos visible in uniform. A Code B licence is advantageous but not compulsory. → SAPS/DCS entry-level training programme.
+- Body: SAPS / Department of Correctional Services
+- Confidence: High (SAPS published admission criteria)
+- AI Impact: **Low** — frontline public-safety work.
+
+### Community Health Worker
+- RIASEC: Social
+- Subjects: **Grade 10 minimum in practice**, though National Department of Health policy states Grade 12 as the standard for some selection processes.
+- Pathway: NC Community Health Work NQF 2 (entry from NQF 1/ABET 4) → NQF 3 → **FETC Community Health Work NQF 4 (SAQA ID 67464)**, which is the baseline employers require for permanent CHW posts. The NQF 2-3 levels lead into Home-Based Care work.
+- Body: HWSETA; SAQA-registered qualification
+- Confidence: High on the qualification ladder; **Medium on employer-by-employer minimums**
+- AI Impact: **Low** — community-based, relational, in-person work.
+- **Accessible route** — entry is possible from Grade 10 / NQF 1, making this one of the most reachable healthcare-adjacent careers.
+
 ## Sector 5: Driven / Enterprising
 
 ### Entrepreneur / Business Owner
@@ -597,6 +732,16 @@ piece.
 - AI Impact: **Medium** — AI travel-planning tools increasingly compete with human operators for routine itinerary-building specifically, though this career's own noted Operator-vs-Guide split matters here too: the in-person Tourist Guide side of tourism work is much less exposed than the back-office logistics/booking side.
 
 ---
+
+
+### Financial Advisor
+- RIASEC: Enterprising (+Conventional/Social)
+- Subjects: Matric. No prescribed subjects, but Mathematics is a strong advantage.
+- Pathway: Appointed as a representative at a licensed FSP → work **under supervision** → pass the **RE5** regulatory exam within 2 years (**66% pass mark**) → complete an FSCA-recognised NQF 5 qualification within 6 years → Class of Business (COB) and product-specific training. You cannot operate independently at the start.
+- Body: FSCA, under the FAIS Act "fit and proper" requirements
+- Confidence: High (FSCA/FAIS published requirements)
+- AI Impact: **Medium** — robo-advice and automated portfolio tools are growing, but regulated advice and client trust stay human-accountable.
+- **Unusual and worth flagging** — you can enter this career *employed and earning* while completing the qualification, rather than studying full-time first.
 
 ## Sector 6: Organised / Detail-focused (Conventional)
 
@@ -684,6 +829,15 @@ neither is true; it depends entirely on how routine the specific task-set is.
 - AI Impact: **Medium** — cost estimation and quantity takeoff software has already been substantially digitised for decades, with generative AI adding a further layer of automation to routine measurement work, but the SACQSP-registered professional's contractual/legal sign-off role keeps accountability human.
 
 ---
+
+### Tax Practitioner
+- RIASEC: Conventional (+Investigative)
+- Subjects: Matric. Mathematics and Accounting are strong advantages.
+- Pathway: Tiered by qualification **and** experience — NQF 6 (including at least one accounting and one tax module) + 1 year tax experience; **or** NQF 5 + 4 years; **or** NQF 4 + 10 years. Must belong to a SARS-recognised controlling body and complete the **SARS Readiness Programme** before registering.
+- Body: SARS, plus a recognised controlling body (SAIT, ICB, SAICA and others)
+- Confidence: High (SARS, SAIT and ICB published)
+- AI Impact: **Medium** — routine return preparation is heavily automated, but advisory work, structuring and representation before SARS remain professional acts.
+- **Accessible route** — the NQF 4 + 10 years path means this profession is reachable from a matric-level start, given time.
 
 ## Summary of entries needing follow-up verification before going live
 
