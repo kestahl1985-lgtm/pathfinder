@@ -521,5 +521,5 @@
 - **45 feed posts = roughly 6.5 weeks of daily posting.** The pillar rotation is deliberately mixed (not clustered) so consecutive days don't feel repetitive — if you reorder for a scheduler, try to keep spotlight/fact/myth/parent posts spread out rather than grouped.
 - **Stories** work best posted more frequently than feed posts (multiple times a week, since they disappear in 24h) — treat these 3 as templates/examples to build more from, not a one-time-only set.
 - **Carousels** perform best on higher-engagement days (test what that is for your account — often midweek evenings or weekends for a SA teen/parent audience).
-- Days 3, 7, 10, 13, 16, 19, 22, 24, 27, 30, 32, 35, 37, 39, 41 are Career Spotlights — that's 15 of the 18 careers in Vula's current matching data. The 3 not covered (Scientist/Researcher, Journalist/Media, Motor Mechanic) are good candidates for the next batch.
+- Days 3, 7, 10, 13, 16, 19, 22, 24, 27, 30, 32, 35, 37, 39, 41 are Career Spotlights — these are 15 of the 88 careers now in Vula's matching data — plenty of scope for future Career Spotlight batches.
 - Every real fact used here (subjects, AI impact ratings, bursary programmes) is pulled from what's already researched and live in the product — nothing invented for the sake of content.

@@ -1,6 +1,6 @@
 # Vula Careers — Sponsorship Agreement (Template)
 
-> **Attorney-reviewed (confirmed fit for purpose, 10 July 2026).** Still fill in the bracketed Schedule A fields per sponsor before sending.
+> **Attorney-reviewed and approved, July 2026 — current version**, including the placement-rotation, impression-floor (3.5) and founding-sponsor early-exit (3.6) provisions. Still fill in the bracketed Schedule A fields per sponsor before sending.
 
 ---
 

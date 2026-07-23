@@ -163,7 +163,7 @@ Probed the live system top-to-bottom after the domain, waitlist, and PDF report 
 2. **Disable public sign-ups in Supabase Auth** (`disable_signup` is currently false; only allow-listed admins need accounts). — Medium
 3. **Enable the registrar lock** on the domain at domains.co.za (status is `ok`, not `clientTransferProhibited`) to prevent domain hijack; optionally enable **DNSSEC**. — Low/Med
 4. **When email is set up**, add **SPF, DKIM and DMARC** records to stop spoofing/phishing from your domain. — Med (future)
-5. **Attorney review of the legal pages: ✅ done, confirmed fit for purpose (10 July 2026).** Registering the entity / Information Officer with the Information Regulator is still outstanding. — Low
+5. **Attorney review of the legal pages and sponsorship agreement: ✅ done and approved (current versions, July 2026).** Registering the entity / Information Officer with the Information Regulator is still outstanding. — Low
 
 ## Full re-inspection — 8-9 July 2026 (post grade/province rework, sponsor-impact + re-engagement features)
 
@@ -197,7 +197,7 @@ Requested by the user as a dedicated "make sure we're rock solid" pass, since a 
 
 ### ⚠️ Still requires you (carried forward — cannot be done in code)
 
-Rotate Twilio Auth Token + Supabase service-role key (shared in plaintext during original setup); disable public sign-ups in Supabase Auth; enable domain registrar lock/DNSSEC; SPF/DKIM/DMARC once email is set up; register the entity / Information Officer with the Information Regulator. None of these are new — see the June section above for detail. **Attorney review of the legal pages and the sponsorship agreement template is done** (confirmed fit for purpose, 10 July 2026) — removed from this list. **The secret-rotation item (Twilio + Supabase) is the single highest-priority item still outstanding from either review pass** since it's been open the longest.
+Rotate Twilio Auth Token + Supabase service-role key (shared in plaintext during original setup); disable public sign-ups in Supabase Auth; enable domain registrar lock/DNSSEC; SPF/DKIM/DMARC once email is set up; register the entity / Information Officer with the Information Regulator. None of these are new — see the June section above for detail. **Attorney review of the legal pages and the sponsorship agreement (current version, incl. the rotation/floor/exit provisions) is done and approved (July 2026)** — removed from this list. **The secret-rotation item (Twilio + Supabase) is the single highest-priority item still outstanding from either review pass** since it's been open the longest.
 
 ## Recommended order of remediation
 

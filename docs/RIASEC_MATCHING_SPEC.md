@@ -252,16 +252,20 @@ Primary sources consulted:
 
 ## 8. What changes in the code
 
-| File | Today | After this spec |
-|------|-------|-----------------|
-| `lib/careers.js` | 18 careers, 1–2 letter codes | 88 careers, **3-letter** codes (counsellor-validated) |
-| `lib/assessment.js` `computeMatches` | `primary×2 + secondary`, no hexagon, no tie rule | Brown-C over 3-letter codes, Rule of 8, stable tie-break |
-| `lib/assessment.js` `findSponsorMatch` | same ad-hoc sum | same Brown-C, so learner & sponsor use one scale |
-| result message | code + top traits | + differentiation / consistency framing when relevant |
+| File | Original | Shipped (interim) | Target (this spec) |
+|------|----------|-------------------|--------------------|
+| `lib/careers.js` | 18 careers, 1–2 letter codes | **88 careers**, 1–2 letter codes (counsellor-approved) | 88 careers, **3-letter** codes |
+| `computeMatches` | `primary×2 + secondary`, no hexagon | **cosine affinity** — person's full profile vs a profile synthesized from the career code; hexagon-aware, length-normalized | 3-letter Brown-C |
+| `findSponsorMatch` | same ad-hoc sum | same cosine affinity, one scale with the learner side | same Brown-C |
+| result message | code + top traits | code + top traits (differentiation & consistency computed, not yet surfaced) | + framing when relevant |
 
-None of this is large; the risk is entirely in the **career codes**, which is why they
-go through review before any of it ships. The matching engine is ~40 lines and fully
-testable against §7's validation set.
+**Status:** the 88 careers and the interim cosine matching are **live**. That method is
+hexagon-aware and normalized (the properties the old sum lacked) and behaves correctly
+across all six pure types and mixed profiles — it is the profile-correlation family
+Xu & Li (2020) rate highest, with the career profile derived from its high-point code.
+The remaining step to the *validated* 3-letter Brown-C is purely the career codes:
+extend each career from its 1–2 letter high-point code to a full ordered three-letter
+code. The engine then swaps one function; everything else stays.
 
 ---
 

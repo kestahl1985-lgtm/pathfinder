@@ -340,7 +340,7 @@ Two genuine gaps from this document's earlier pass that it partially fills:
    `lib/careers.js` once that schema is restructured (already planned per the career draft's
    "Recommended next steps").
 3. Close the 5 uncovered-fields gap above with a second, more targeted research pass before
-   claiming full coverage across Vula's 30 (soon 71) careers.
+   claiming full coverage across Vula's 88 careers.
 4. Adopt the same **"last verified" date per bursary** discipline already recommended for
    careers — bursary cycles are, if anything, more time-sensitive than subject/APS requirements.
 

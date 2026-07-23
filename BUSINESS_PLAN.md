@@ -81,7 +81,7 @@ Launch province-first (Western Cape), recruit an initial cohort of "founding spo
 ## 9. Team & Operations
 
 - Founder-operated at this stage (Kyal Stahl, Information Officer). Solo/lean team is appropriate for an MVP-to-early-traction stage; plan to bring in a part-time sponsor/partnerships lead once the first 3–5 paying sponsors are signed (sales cycle for institutional budgets is relationship-heavy and time-consuming).
-- Legal/compliance: attorney review of POPIA/consent flows and the sponsorship agreement template completed and confirmed fit for purpose (10 July 2026).
+- Legal/compliance: attorney review of the POPIA/consent flows and the full sponsorship agreement — including the rotation, impression-floor and early-exit provisions — completed and approved (July 2026).
 
 ## 10. Financial Plan (high-level)
 
@@ -107,7 +107,7 @@ Launch province-first (Western Cape), recruit an initial cohort of "founding spo
 
 | Risk | Mitigation |
 |---|---|
-| POPIA/legal exposure (minors) | Attorney review of consent flow and privacy pages completed (10 July 2026); RLS-locked DB; DELETE/STOP always honoured |
+| POPIA/legal exposure (minors) | Attorney review of consent flow, privacy pages and the sponsorship agreement completed and approved (July 2026); RLS-locked DB; DELETE/STOP always honoured |
 | Meta/WhatsApp Business approval delay | Templates and business verification already submitted; sandbox remains a fallback in the interim |
 | Sponsor sales cycle is slow (institutional budgets, procurement) | Start with smaller, more agile private colleges/training providers alongside university outreach; corporate CSI/Skills Development budgets often move faster than academic marketing budgets |
 | Twilio messaging costs scale with learner growth | Monitor cost-per-assessment from day one of production launch; consider WhatsApp's free-tier "service conversation" windows to minimise paid template sends |

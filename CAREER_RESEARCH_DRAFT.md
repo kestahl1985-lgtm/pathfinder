@@ -2,7 +2,7 @@
 
 **Status: DRAFT — not yet in production code. Requires career counsellor / professional body review before use.**
 
-This document consolidates deep research on 71 careers for South African high school
+This document consolidates deep research on 88 careers for South African high school
 learners, covering RIASEC fit, required NSC (CAPS) subjects, qualification pathways,
 and relevant professional bodies. Research was conducted via live web search against
 current South African sources (university admission pages, professional body sites,
@@ -32,7 +32,7 @@ Social Work, Police, some Landscaping/Horticulture routes).
 Every career below now also carries an **AI Impact: Low / Medium / High** rating,
 answering "how much is AI likely to reshape or reduce demand for this work?" This is a
 genuinely more judgment-laden claim than a subject requirement — there is no single
-authoritative South African source that scores all 71 of these careers directly, so
+authoritative South African source that scores all 88 of these careers directly, so
 each rating is a synthesis across several real, cited studies rather than a lookup from
 one source. Treat these as directional, not precise — and re-derive them periodically,
 since this is the fastest-moving fact in the whole document.
