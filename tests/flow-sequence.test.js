@@ -18,7 +18,8 @@
 
 const assert = require("assert");
 const path = require("path");
-const { advance, QUESTION_TRAITS, selectSponsor, ROTATION_BAND } = require(path.join(__dirname, "..", "lib", "assessment.js"));
+const { advance, QUESTION_TRAITS, selectSponsor, ROTATION_BAND, affinity, hexDist, personCode } = require(path.join(__dirname, "..", "lib", "assessment.js"));
+const { CAREERS } = require(path.join(__dirname, "..", "lib", "careers.js"));
 
 let testCount = 0;
 function check(name, fn) {
@@ -254,6 +255,56 @@ async function runOnboarding(s) {
     const text = out.map((p) => p.text || "").join(" ");
     assert.strictEqual(s.step, "exploring", "picking career 1 did not enter exploring");
     assert.ok(text.length > 0, "career detail was empty");
+  });
+
+  // ---- 11. RIASEC matching (hexagon-aware affinity over 88 careers) ----
+  await check("hexDist is the cyclic hexagon metric (0 same, 1 adj, 2 alt, 3 opp)", () => {
+    assert.strictEqual(hexDist("R", "R"), 0);
+    assert.strictEqual(hexDist("R", "I"), 1);   // adjacent
+    assert.strictEqual(hexDist("R", "A"), 2);   // alternate
+    assert.strictEqual(hexDist("R", "S"), 3);   // opposite
+    assert.strictEqual(hexDist("C", "R"), 1);   // wraps around
+  });
+
+  await check("affinity ranks a pure-type person highest on that type's careers", () => {
+    const pureR = { R: 10, I: 0, A: 0, S: 0, E: 0, C: 0 };
+    assert.ok(affinity(pureR, ["R"]) > affinity(pureR, ["I"]), "R career should beat I career for pure-R");
+    assert.ok(affinity(pureR, ["I"]) > affinity(pureR, ["S"]), "adjacent (I) should beat opposite (S)");
+    assert.ok(Math.abs(affinity(pureR, ["S"])) < 1e-9, "opposite type should score ~0");
+  });
+
+  await check("affinity is length-normalized: a 2-letter career can't win by weight alone", () => {
+    const pureS = { R: 0, I: 0, A: 0, S: 10, E: 0, C: 0 };
+    // a pure-S person must prefer a pure-S career over an A-primary/S-secondary one
+    assert.ok(affinity(pureS, ["S"]) > affinity(pureS, ["A", "S"]),
+      "pure-S career should outrank AS career for a pure-S person");
+  });
+
+  await check("affinity is shape-aware: two-interest person prefers a career needing both", () => {
+    const IS = { R: 0, I: 10, A: 0, S: 10, E: 0, C: 0 };
+    assert.ok(affinity(IS, ["I", "S"]) > affinity(IS, ["I"]),
+      "IS career should beat I-only career for an I+S person");
+  });
+
+  await check("every one of the 88 careers has a valid 1-3 letter Holland code", () => {
+    assert.strictEqual(CAREERS.length, 88, "expected 88 careers");
+    for (const c of CAREERS) {
+      assert.ok(Array.isArray(c.traits) && c.traits.length >= 1 && c.traits.length <= 3, `${c.name}: bad code length`);
+      for (const t of c.traits) assert.ok("RIASEC".includes(t), `${c.name}: invalid trait ${t}`);
+      assert.ok(c.id && c.name && c.list && c.why && c.subjects && c.qual && c.aiImpact, `${c.name}: missing field`);
+    }
+    const ids = CAREERS.map((c) => c.id);
+    assert.strictEqual(ids.length, new Set(ids).size, "duplicate career ids");
+  });
+
+  await check("computeMatches returns 6 real career ids ranked by affinity", async () => {
+    const s = freshSession("t-match");
+    await runOnboarding(s);
+    for (let i = 0; i < 30; i++) await advance(s, i % 6 === 0 ? "2" : "0", null); // pure-R answers
+    assert.strictEqual((s.data.matches || []).length, 6, "expected 6 matches");
+    for (const id of s.data.matches) assert.ok(CAREERS.find((c) => c.id === id), `unknown id ${id}`);
+    const top = CAREERS.find((c) => c.id === s.data.matches[0]);
+    assert.ok(top.traits.includes("R"), "top match for a pure-R person should involve R");
   });
 
   if (process.exitCode === 1) {
