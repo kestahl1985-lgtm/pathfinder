@@ -280,6 +280,23 @@ async function runOnboarding(s) {
       "pure-S career should outrank AS career for a pure-S person");
   });
 
+  await check("affinity always returns a 0-1 value (match_score is stored as int×100)", () => {
+    // Guards a real production bug: affinity returns a cosine, but
+    // sponsor_matches.match_score is an INT column. logSponsorMatch scales by
+    // ×100; if affinity ever leaves [0,1] that scaling silently breaks the
+    // insert and drops every impression. Keep this range, or fix the column.
+    for (const [profile, code] of [
+      [{ R: 10, I: 5, A: 0, S: 0, E: 0, C: 0 }, ["R", "I"]],
+      [{ R: 0, I: 0, A: 0, S: 10, E: 0, C: 0 }, ["S"]],
+      [{ R: 3, I: 3, A: 3, S: 3, E: 3, C: 3 }, ["A", "E", "C"]],
+      [{ R: 10, I: 0, A: 0, S: 0, E: 0, C: 0 }, ["S"]], // opposite -> ~0
+    ]) {
+      const v = affinity(profile, code);
+      assert.ok(v >= 0 && v <= 1, `affinity out of [0,1]: ${v}`);
+      assert.ok(Number.isInteger(Math.round(v * 100)), "scaled score not an int");
+    }
+  });
+
   await check("affinity is shape-aware: two-interest person prefers a career needing both", () => {
     const IS = { R: 0, I: 10, A: 0, S: 10, E: 0, C: 0 };
     assert.ok(affinity(IS, ["I", "S"]) > affinity(IS, ["I"]),
