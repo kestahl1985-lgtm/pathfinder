@@ -33,6 +33,7 @@ interface Course {
   name: string;
   required_subjects: string[] | null;
   duration_years: number | null;
+  description: string | null;
   riasec_match: Record<string, number>;
   prospectus_url: string | null;
   active: boolean;
@@ -118,6 +119,7 @@ export default function SponsorsPage() {
       name: c.name.trim(),
       required_subjects: c.required_subjects?.length ? c.required_subjects : null,
       duration_years: c.duration_years || null,
+      description: c.description?.trim() || null,
       riasec_match: buildRiasecMatch(c.primary || "R", c.secondary || ""),
       prospectus_url: c.prospectus_url || null,
       active: c.active ?? true,
@@ -411,6 +413,16 @@ function CourseModal({ course, onClose, onSave }: { course: Partial<Course> & { 
             onChange={(e) => setForm({ ...form, duration_years: e.target.value ? parseInt(e.target.value, 10) : null })}
             className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand"
           />
+          <div>
+            <textarea
+              placeholder="Short description (optional) — shown to learners who reply INFO"
+              value={form.description || ""}
+              onChange={(e) => setForm({ ...form, description: e.target.value.slice(0, 400) })}
+              rows={2}
+              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand resize-none"
+            />
+            <p className="text-[11px] text-gray-400 mt-0.5 text-right">{(form.description || "").length}/400</p>
+          </div>
 
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Prospectus PDF (optional)</label>
