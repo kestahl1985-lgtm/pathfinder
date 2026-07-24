@@ -256,7 +256,7 @@
           <a href="#why">Why it matters</a>
           <a href="#faq">FAQ</a>
         </div>
-        <a class="btn btn-wa wa-cta" href="#waitlist" style="padding:11px 20px;font-size:15px">Join the waitlist</a>
+        <a class="btn btn-wa wa-cta" href="https://wa.me/27768428433?text=Hi" target="_blank" rel="noopener" style="padding:11px 20px;font-size:15px">Chat on WhatsApp</a>
       </div>
     </nav>
 
@@ -273,9 +273,9 @@
             thrive in, and the exact subjects and qualifications you need — in a 5-minute chat. Free, for everyone in South Africa.
           </p>
           <div class="hero-cta">
-            <a class="btn btn-wa wa-cta" href="#waitlist">
+            <a class="btn btn-wa wa-cta" href="https://wa.me/27768428433?text=Hi" target="_blank" rel="noopener">
               <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 .4C7.4.4.5 7.3.5 15.9c0 2.8.7 5.4 2 7.8L.4 31.6l8.1-2.1c2.3 1.2 4.8 1.9 7.5 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.4 16 .4zm0 28.2c-2.4 0-4.6-.6-6.5-1.8l-.5-.3-4.8 1.3 1.3-4.7-.3-.5c-1.3-2-2-4.4-2-6.9C3 8.9 8.8 3.1 16 3.1S29 8.9 29 16.1 23.2 28.6 16 28.6zm7.3-9.4c-.4-.2-2.4-1.2-2.7-1.3-.4-.1-.7-.2-.9.2-.3.4-1 1.3-1.3 1.6-.2.2-.4.3-.8.1-2.4-1.2-3.9-2.1-5.5-4.8-.4-.7.4-.6 1.1-2.1.1-.2.1-.5 0-.6-.1-.2-.9-2.1-1.2-2.9-.3-.7-.6-.6-.9-.7h-.7c-.2 0-.6.1-.9.5-.3.4-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.5 3.8 6 5.3 2.2 1 3.1 1 4.2.9.7-.1 2.4-1 2.7-1.9.3-.9.3-1.7.2-1.9-.1-.2-.4-.3-.8-.5z"/></svg>
-              Join the waitlist
+              Chat on WhatsApp
             </a>
             <a href="#how" class="btn btn-ghost">See how it works</a>
           </div>
@@ -416,15 +416,12 @@
           <div class="blob" style="width:360px;height:360px;background:#6d5efc;top:-120px;left:-60px;opacity:.4"></div>
           <div class="blob" style="width:320px;height:320px;background:#25d366;bottom:-140px;right:-40px;opacity:.25"></div>
           <div style="position:relative;z-index:2">
-            <h2 id="waitlist">Your future is one message away.</h2>
-            <p>Vula opens at the end of August 2026. Leave your details and we'll message you the moment it does.</p>
-            <form class="wl-form" id="wlForm" novalidate>
-              <input type="text" id="wlName" name="name" placeholder="Your name" autocomplete="given-name" required />
-              <input type="text" id="wlContact" name="contact" placeholder="Phone number or email" autocomplete="email" required />
-              <input class="wl-hp" type="text" id="wlWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-              <button class="btn btn-wa" type="submit" style="font-size:17px;padding:15px 30px">Notify me at launch</button>
-            </form>
-            <div class="wl-msg" id="wlMsg" role="status" aria-live="polite"></div>
+            <h2>Your future is one message away.</h2>
+            <p>Free, 5 minutes, right now — no app, no sign-up. Just open WhatsApp and say hi.</p>
+            <a class="btn btn-wa wa-cta" href="https://wa.me/27768428433?text=Hi" target="_blank" rel="noopener" style="font-size:18px;padding:18px 34px">
+              <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 .4C7.4.4.5 7.3.5 15.9c0 2.8.7 5.4 2 7.8L.4 31.6l8.1-2.1c2.3 1.2 4.8 1.9 7.5 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.4 16 .4z"/></svg>
+              Chat on WhatsApp
+            </a>
           </div>
         </div>
       </div>
@@ -448,9 +445,9 @@
 
     <!-- Sticky mobile CTA -->
     <div class="sticky-cta">
-      <a class="btn btn-wa wa-cta" href="#waitlist">
+      <a class="btn btn-wa wa-cta" href="https://wa.me/27768428433?text=Hi" target="_blank" rel="noopener">
         <svg viewBox="0 0 32 32" fill="currentColor" style="width:20px;height:20px"><path d="M16 .4C7.4.4.5 7.3.5 15.9c0 2.8.7 5.4 2 7.8L.4 31.6l8.1-2.1c2.3 1.2 4.8 1.9 7.5 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.4 16 .4z"/></svg>
-        Join the waitlist
+        Chat on WhatsApp
       </a>
     </div>
 
@@ -467,30 +464,6 @@
         entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("show"); io.unobserve(e.target); } });
       }, { threshold: 0.12 });
       document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
-    </script>
-      <script>
-      (function () {
-        var f = document.getElementById('wlForm');
-        if (!f) return;
-        var msg = document.getElementById('wlMsg');
-        f.addEventListener('submit', function (e) {
-          e.preventDefault();
-          var name = document.getElementById('wlName').value.trim();
-          var contact = document.getElementById('wlContact').value.trim();
-          if (!name || !contact) { msg.className = 'wl-msg err'; msg.textContent = 'Please add your name and a phone number or email.'; return; }
-          msg.className = 'wl-msg'; msg.textContent = 'Adding you…';
-          fetch('https://api.vulacareers.co.za/waitlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, contact: contact, website: document.getElementById('wlWebsite').value })
-          }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-            .then(function (res) {
-              if (res.ok) { msg.className = 'wl-msg ok'; msg.textContent = "You're on the list — we'll message you at launch."; f.reset(); }
-              else { msg.className = 'wl-msg err'; msg.textContent = (res.j && res.j.error) || 'Something went wrong. Please try again.'; }
-            })
-            .catch(function () { msg.className = 'wl-msg err'; msg.textContent = 'Could not reach the server. Please try again.'; });
-        });
-      })();
     </script>
   </body>
 </html>
