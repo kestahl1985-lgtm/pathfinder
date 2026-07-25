@@ -18,6 +18,17 @@
 
 const assert = require("assert");
 const path = require("path");
+
+// HERMETIC TESTS — must never touch a real database. This file is the Vercel
+// deploy gate (vercel.json ignoreCommand), and the build environment has the
+// production Supabase credentials set. Without clearing them here, the cases
+// that explore a career call findSponsorMatch/logSponsorMatch against the LIVE
+// database on every deploy, writing junk "t-info-number" impression rows into
+// production sponsor_matches. assessment.js reads these at module load, so they
+// must be cleared BEFORE the require below.
+delete process.env.SUPABASE_URL;
+delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 const { advance, QUESTION_TRAITS, selectSponsor, ROTATION_BAND, affinity, hexDist, personCode } = require(path.join(__dirname, "..", "lib", "assessment.js"));
 const { CAREERS } = require(path.join(__dirname, "..", "lib", "careers.js"));
 
