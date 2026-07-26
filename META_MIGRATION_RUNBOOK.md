@@ -1,5 +1,17 @@
 # Vula — Twilio → Meta Cloud API Migration Runbook
 
+> ## ✅ COMPLETED — July 2026
+> **The migration is done. Twilio has been cut off; the number now runs on the Meta
+> Cloud API.** Live state, verified: `/webhook-meta` is the active inbound webhook,
+> the WABA "Vula Career Guide" is verified with quality rating **GREEN (High)** and
+> messaging tier **TIER_250**, and the `META_*` env vars are set in the backend
+> Vercel project. Phone keys are preserved as `whatsapp:+<number>` across the switch,
+> so sessions carried over. The Twilio route (`/webhook`) and `TWILIO_*` env vars are
+> now dormant/dead — safe to remove. Everything below is the historical plan, kept
+> for reference.
+
+---
+
 **Why:** Meta Cloud API bills WhatsApp conversations at Meta's direct rates with no BSP markup. Twilio adds a per-message fee on top. At scale this is a large saving; at demo/pilot volume it's negligible — so **migrate deliberately, not urgently.**
 
 **Status of the code:** DONE. `api/webhook-meta.js` is a complete Meta implementation sharing all the same logic as the Twilio bot (`lib/assessment.js`). It's already routed at `/webhook-meta`. `api/reengage-action.js` (re-engagement) already targets Meta too. Nothing needs to be written — this is purely account setup + a number cutover.

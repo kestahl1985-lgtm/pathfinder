@@ -71,7 +71,7 @@ Vula's structural advantage is distribution (WhatsApp) + personalisation (RIASEC
 - Production-ready platform live: WhatsApp assessment flow, PDF report generation, admin dashboard.
 - Domain, brand, legal entity (Vula Career Guide (Pty) Ltd, reg 2026/021440/07) and core POPIA documentation in place.
 - Marketing site live at vulacareers.co.za with a pre-launch waitlist.
-- Moving from Twilio sandbox to a production WhatsApp Business sender (Meta Business verification in progress).
+- Live on the **Meta Cloud API** WhatsApp Business sender (migrated off Twilio, July 2026); WABA verified as "Vula Career Guide", quality rating GREEN.
 - Admin **Sponsors** module built: institutions and courses can be added, geographically tagged, and toggled on/off depending on active sponsorship status.
 
 ## 8. Go-To-Market (summary — see MARKETING_PLAN.md for detail)

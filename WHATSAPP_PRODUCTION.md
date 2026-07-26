@@ -1,3 +1,8 @@
+> ## ⚠️ SUPERSEDED — July 2026
+> This described the Twilio sandbox → Twilio production path. Vula has since migrated
+> off Twilio entirely to the **Meta Cloud API** (see META_MIGRATION_RUNBOOK.md, now
+> completed). Twilio is cut off. Kept for historical reference only.
+
 # WhatsApp Production Launch — Vula Careers
 
 Moving from the Twilio WhatsApp **sandbox** to a **production** WhatsApp Business sender.
