@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import { Search, MessageCircle, FileDown } from "lucide-react";
+import { Search, MessageCircle, FileDown, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import MessageModal from "../components/MessageModal";
 
@@ -17,8 +17,27 @@ interface Session {
 }
 
 export default function StudentsPage() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [messaging, setMessaging] = useState<{ phone: string; name?: string } | null>(null);
+  const [confirming, setConfirming] = useState<Session | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  // Erase a learner across every table that keys off their phone — the same
+  // cascade as the learner-facing DELETE command (lib/assessment.js
+  // deleteSession). Irreversible; POPIA right-to-erasure from the admin side.
+  const deleteLearner = async (phone: string) => {
+    setDeleting(true);
+    setDeleteError("");
+    await supabase.from("sponsor_matches").delete().eq("phone", phone);
+    await supabase.from("reengagement_queue").delete().eq("phone", phone);
+    const { error } = await supabase.from("whatsapp_sessions").delete().eq("phone", phone);
+    setDeleting(false);
+    if (error) { setDeleteError(error.message); return; }
+    setConfirming(null);
+    queryClient.invalidateQueries({ queryKey: ["sessions"] });
+  };
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["sessions"],
@@ -133,13 +152,22 @@ export default function StudentsPage() {
                       {new Date(s.updated_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => setMessaging({ phone: s.phone, name: s.data?.name })}
-                        title="Send WhatsApp message"
-                        className="p-2 rounded-lg text-brand hover:bg-brand/10 transition"
-                      >
-                        <MessageCircle size={18} />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setMessaging({ phone: s.phone, name: s.data?.name })}
+                          title="Send WhatsApp message"
+                          className="p-2 rounded-lg text-brand hover:bg-brand/10 transition"
+                        >
+                          <MessageCircle size={18} />
+                        </button>
+                        <button
+                          onClick={() => { setDeleteError(""); setConfirming(s); }}
+                          title="Delete learner and all their data"
+                          className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -157,6 +185,46 @@ export default function StudentsPage() {
 
       {messaging && (
         <MessageModal phone={messaging.phone} name={messaging.name} onClose={() => setMessaging(null)} />
+      )}
+
+      {confirming && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => !deleting && setConfirming(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <h2 className="text-lg font-bold text-navy">Delete this learner?</h2>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                This permanently erases{" "}
+                <span className="font-semibold text-navy">
+                  {[confirming.data?.name, confirming.data?.surname].filter(Boolean).join(" ") || confirming.phone.replace("whatsapp:", "")}
+                </span>{" "}
+                — their session, assessment answers, any sponsor-match records and re-engagement entries.
+                This mirrors a learner's own DELETE request and <span className="font-semibold">cannot be undone</span>.
+              </p>
+              {deleteError && <p className="text-xs text-red-600 mt-3">{deleteError}</p>}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setConfirming(null)}
+                  disabled={deleting}
+                  className="flex-1 py-2.5 rounded-xl font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => deleteLearner(confirming.phone)}
+                  disabled={deleting}
+                  className="flex-1 py-2.5 rounded-xl font-semibold text-white bg-red-600 hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {deleting ? <><Loader2 size={16} className="animate-spin" /> Deleting…</> : "Delete permanently"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

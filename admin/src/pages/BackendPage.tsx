@@ -12,7 +12,15 @@ import { Activity, Zap, MessageSquare, CheckCircle, AlertCircle, Clock, Database
 // than one that shows fewer honest ones.
 
 const API_HEALTH = "https://api.vulacareers.co.za/health";
+const API_QUALITY = "https://api.vulacareers.co.za/whatsapp-quality";
 const REFRESH_MS = 20000;
+
+// Meta quality-rating colours (GREEN/YELLOW/RED) → tile styling.
+const QUALITY = {
+  GREEN: { label: "High", cls: "text-green-400", dot: "bg-green-500" },
+  YELLOW: { label: "Medium", cls: "text-yellow-400", dot: "bg-yellow-500" },
+  RED: { label: "Low", cls: "text-red-400", dot: "bg-red-500" },
+} as const;
 
 function relTime(iso: string | null): string {
   if (!iso) return "—";
@@ -64,6 +72,15 @@ async function loadStatus() {
   const { error: dbErr } = await supabase.from("whatsapp_sessions").select("phone", { count: "exact", head: true });
   db = { ok: !dbErr, ms: Math.round(performance.now() - dbT0) };
 
+  // --- WhatsApp quality rating (real, from Meta Graph API when configured) ---
+  let quality: any = { configured: false };
+  try {
+    const r = await fetch(API_QUALITY, { cache: "no-store" });
+    quality = await r.json();
+  } catch {
+    quality = { configured: false, reason: "Quality endpoint unreachable." };
+  }
+
   const [total, completed, activeToday, impressions, sponsors, waitlist, recent] = await Promise.all([
     count("whatsapp_sessions"),
     count("whatsapp_sessions", (q) => q.not("report_token", "is", null)),
@@ -82,6 +99,7 @@ async function loadStatus() {
   return {
     api,
     db,
+    quality,
     metrics: { total, completed, activeToday, impressions, sponsors, waitlist },
     completion: total > 0 ? Math.round((completed / total) * 100) : 0,
     lastActivity: recent[0]?.updated_at || null,
@@ -222,6 +240,38 @@ export default function BackendPage() {
 
           {/* Latency + real totals */}
           <div className="space-y-6">
+            {/* WhatsApp quality rating — real (Meta) when configured, honest when not */}
+            <div className="bg-gradient-to-br from-[#25d366]/15 to-slate-950 border border-slate-700 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <MessageSquare className="w-8 h-8 text-[#25d366]" />
+                {data?.quality?.configured && data.quality.ok && (
+                  <span className={`flex items-center gap-1.5 text-xs font-bold ${QUALITY[data.quality.quality_rating as keyof typeof QUALITY]?.cls || "text-slate-400"}`}>
+                    <span className={`w-2 h-2 rounded-full ${QUALITY[data.quality.quality_rating as keyof typeof QUALITY]?.dot || "bg-slate-500"}`} />
+                    {QUALITY[data.quality.quality_rating as keyof typeof QUALITY]?.label || data.quality.quality_rating}
+                  </span>
+                )}
+              </div>
+              <p className="text-slate-300 text-sm mb-2">WhatsApp quality rating</p>
+              {isLoading ? (
+                <p className="text-2xl font-bold text-white">…</p>
+              ) : data?.quality?.configured && data.quality.ok ? (
+                <>
+                  <p className={`text-2xl font-bold ${QUALITY[data.quality.quality_rating as keyof typeof QUALITY]?.cls || "text-white"}`}>
+                    {QUALITY[data.quality.quality_rating as keyof typeof QUALITY]?.label || data.quality.quality_rating}
+                  </p>
+                  <p className="text-slate-400 text-xs mt-4">
+                    {data.quality.messaging_limit_tier ? `Messaging tier: ${String(data.quality.messaging_limit_tier).replace("TIER_", "")}` : "From Meta Graph API"}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-bold text-slate-300">Not available yet</p>
+                  <p className="text-slate-400 text-xs mt-3 leading-relaxed">
+                    {data?.quality?.reason || "The sender is on Twilio — the Meta quality rating activates after the Meta migration. Check the Twilio Console for now."}
+                  </p>
+                </>
+              )}
+            </div>
             <div className="bg-gradient-to-br from-emerald-900 to-emerald-950 border border-emerald-700 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <Zap className="w-8 h-8 text-emerald-400" />
