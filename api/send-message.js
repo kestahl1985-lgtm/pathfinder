@@ -2,20 +2,21 @@
 // POST { phone, message } with Authorization: Bearer <supabase access token>
 // from a logged-in admin session. Verifies the token, checks the caller is
 // in admin_allowlist, confirms the phone belongs to a known learner
-// (whatsapp_sessions), sends via Twilio, and logs the attempt.
+// (whatsapp_sessions), sends via the Meta Cloud API, and logs the attempt.
 //
 // Note: WhatsApp only allows free-form replies within 24h of the learner's
-// last inbound message (the "session window"). Outside that window Twilio
-// returns error 63016/63024/63015 and this endpoint surfaces that clearly
-// rather than failing silently.
+// last inbound message (the "session window"). Outside that window Meta
+// returns error 131047 ("re-engagement" / >24h) and this endpoint surfaces
+// that clearly rather than failing silently — to reach a learner outside the
+// window you must use an approved template, not free-form text.
 
 const https = require("https");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+const META_ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
+const META_PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
+const GRAPH_VERSION = process.env.META_GRAPH_VERSION || "v21.0";
 
 const ALLOWED_ORIGINS = [
   "https://admin.vulacareers.co.za",
@@ -101,20 +102,23 @@ async function isAllowlisted(email) {
   return Array.isArray(rows) && rows.length > 0;
 }
 
-function twilioSend(to, body) {
+// Send free-form text via the Meta Cloud API. Meta wants the recipient as a
+// bare number (digits only), not Twilio's "whatsapp:+…" address form.
+function metaSend(to, body) {
   return new Promise((resolve) => {
-    const params = new URLSearchParams({
-      From: `whatsapp:${PHONE_NUMBER}`,
-      To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}`,
-      Body: body,
+    const wa = String(to).replace(/^whatsapp:/, "").replace(/[^\d]/g, "");
+    const payload = JSON.stringify({
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: wa,
+      type: "text",
+      text: { preview_url: false, body },
     });
-    const payload = params.toString();
-    const auth = Buffer.from(`${ACCOUNT_SID}:${AUTH_TOKEN}`).toString("base64");
     const req = https.request(
-      { hostname: "api.twilio.com", path: `/2010-04-01/Accounts/${ACCOUNT_SID}/Messages.json`, method: "POST",
+      { hostname: "graph.facebook.com", path: `/${GRAPH_VERSION}/${META_PHONE_NUMBER_ID}/messages`, method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${auth}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${META_ACCESS_TOKEN}`,
           "Content-Length": Buffer.byteLength(payload),
         } },
       (res) => {
@@ -140,7 +144,7 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") { res.statusCode = 204; res.end(); return; }
   if (req.method !== "POST") { res.statusCode = 405; res.end(JSON.stringify({ error: "Method not allowed" })); return; }
 
-  if (!SUPABASE_URL || !SUPABASE_KEY || !ACCOUNT_SID || !AUTH_TOKEN || !PHONE_NUMBER) {
+  if (!SUPABASE_URL || !SUPABASE_KEY || !META_ACCESS_TOKEN || !META_PHONE_NUMBER_ID) {
     res.statusCode = 500; res.end(JSON.stringify({ error: "Not configured" })); return;
   }
 
@@ -176,24 +180,29 @@ module.exports = async (req, res) => {
     res.statusCode = 404; res.end(JSON.stringify({ error: "No learner found with that phone number" })); return;
   }
 
-  const result = await twilioSend(phone, message);
+  const result = await metaSend(phone, message);
 
+  // Meta returns { messages: [{ id: "wamid..." }] } on success, or
+  // { error: { message, code } } on failure. twilio_sid is reused to store the
+  // provider message id (no schema change; it's just an external reference).
+  const metaId = result.data && result.data.messages && result.data.messages[0] && result.data.messages[0].id;
+  const metaErr = result.data && result.data.error && result.data.error.message;
   await supaInsert("admin_messages", {
     sent_by: email,
     to_phone: phone,
     body: message,
     status: result.ok ? "sent" : "failed",
-    twilio_sid: result.data && result.data.sid ? result.data.sid : null,
-    error: result.ok ? null : (result.data && result.data.message) || result.error || `HTTP ${result.status}`,
+    twilio_sid: metaId || null,
+    error: result.ok ? null : metaErr || result.error || `HTTP ${result.status}`,
   });
 
   if (result.ok) {
     res.statusCode = 200;
-    res.end(JSON.stringify({ ok: true, sid: result.data.sid }));
+    res.end(JSON.stringify({ ok: true, sid: metaId || null }));
   } else {
-    // Twilio 63016/63024/63015-ish errors mean the 24h free-form window is closed.
-    const twilioMsg = (result.data && result.data.message) || result.error || "Send failed";
+    // Meta error 131047 means the 24h free-form window is closed — a template
+    // is required to re-engage. Surface Meta's message rather than failing mute.
     res.statusCode = 502;
-    res.end(JSON.stringify({ ok: false, error: twilioMsg }));
+    res.end(JSON.stringify({ ok: false, error: metaErr || result.error || "Send failed" }));
   }
 };

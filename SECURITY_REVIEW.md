@@ -11,7 +11,7 @@
 | # | Finding | Severity |
 |---|---------|----------|
 | 1 | Public anon key + permissive RLS (`USING (true)`) exposes learner PII & leads | 🔴 Critical |
-| 2 | No Twilio webhook signature validation (request forgery / message abuse) | 🟠 High |
+| 2 | ~~No Twilio webhook signature validation~~ — RESOLVED: Twilio cut off, /webhook removed (July 2026) | ✅ Done |
 | 3 | Secrets shared in plaintext should be rotated before production | 🟠 High |
 | 4 | No rate limiting / abuse protection on `/webhook` | 🟡 Medium |
 | 5 | No data-retention / deletion job for `whatsapp_sessions` (minors' PII) | 🟡 Medium |
@@ -63,6 +63,13 @@ This is especially serious because the data subjects are **children**, and unaut
 
 ---
 
+## 2. ✅ RESOLVED — `/webhook` (Twilio) removed
+
+Twilio was cut off in the Meta Cloud API migration (July 2026) and the `/webhook` route + `api/webhook.js` were deleted, so there is no longer an unauthenticated Twilio endpoint to forge. The active `/webhook-meta` endpoint verifies every request via `META_APP_SECRET` and fails closed.
+
+<details><summary>Original finding (historical)</summary>
+
+</details>
 ## 2. 🟠 HIGH — `/webhook` does not verify requests come from Twilio
 
 **Where:** `api/webhook.js` (handler) — no `X-Twilio-Signature` check.

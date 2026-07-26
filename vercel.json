@@ -16,7 +16,6 @@
       },
       "continue": true
     },
-    { "src": "/webhook", "dest": "/api/webhook.js" },
     { "src": "/webhook-meta", "dest": "/api/webhook-meta.js" },
     { "src": "/health", "dest": "/api/health.js" },
     { "src": "/whatsapp-quality", "dest": "/api/whatsapp-quality.js" },
