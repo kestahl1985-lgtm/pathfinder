@@ -1,10 +1,17 @@
 # Vula — Subject-Based Study Paths: Spec & Review
 
-**Status: DRAFT foundation for career-counsellor review.**
-Prepared July 2026. The data lives in `lib/subject_requirements.js` (first-pass,
-extracted from `CAREER_RESEARCH_DRAFT.md`). This spec explains what it powers, how
-matching works, and — most importantly — what the reviewer must confirm before any
-of it drives advice to a real learner.
+**Status: COUNSELLOR-REVIEWED (final), July 2026.**
+The data lives in `lib/subject_requirements.js`. It has been reviewed and confirmed
+against the 100-career master review, and **all 100 careers are now in `lib/careers.js`
+and keyed here**. Of the 100, **92 are confirmed (`needs_review: false`)** and cleared
+for learner-facing use; **8 remain `needs_review: true`** — flagged "verify with
+institution" in the review and must carry a "confirm with the institution" caveat until
+re-confirmed. (The 12 careers added in this round — Data Analyst, Cloud/Network Engineer,
+Biokineticist, Dental Therapist, Sonographer, Compliance Officer, Paralegal,
+Instrumentation Technician, SHEQ Officer, Rigging/Crane Operator, Environmental Health
+Practitioner, Horticulturist — were all confirmed in the review.)
+
+This spec explains what the data powers, how matching works, and what still needs care.
 
 ---
 
@@ -28,18 +35,24 @@ Getting a subject requirement wrong is the one failure mode the career research 
 warns about: telling a learner they qualify for medicine on Maths Literacy (they don't),
 or that a trade needs Pure Maths when it doesn't, steers a real person wrong.
 
-A first-pass automated extraction is **not** safe to ship. Of the 88 careers,
-**63 (72%) are flagged `needs_review`**, broken down as:
+The first-pass automated extraction was **not** safe to ship, so it was fully reviewed.
+After review, 92 of 100 entries are confirmed and 8 remain `needs_review: true` — each
+of the 8 because the counsellor marked it "verify with institution":
 
-| Flag reason | Count | What the reviewer does |
-|---|---|---|
-| Maths type unclear (Pure vs Literacy) | ~43 | Confirm which maths, and the minimum level |
-| Source found no firm NSC requirement | ~10 | Confirm the real entry gate, or mark "open entry" |
-| Low confidence / "verify" in the source | ~several | Verify against the institution's current admissions |
-| No subjects detected | ~few | Fill in from the qualification's real requirements |
+| Career | Reason it stays flagged |
+|---|---|
+| Biomedical Lab Technologist | Confirm against a specific institution's current requirements |
+| Occupational Therapist | Maths Pure-vs-Literacy is institution-dependent |
+| Physicist / Astronomer | Levels are estimated proxies — confirm |
+| Speech Therapist | Maths requirement institution-dependent |
+| Veterinarian | Level inferred, not confirmed (verify with UP) |
+| Environmental Scientist | Maths Pure-vs-Literacy institution-dependent |
+| Merchant Navy / Marine Officer | Confirm with SAMSA / maritime institute |
+| Nurse | Maths Pure-vs-Literacy institution-dependent |
 
-`source_text` on every entry is the verbatim research note and is the source of truth;
-the structured fields are the parser's best guess and exist to be corrected.
+`source_text` on every entry is the counsellor-reviewed note. Only `needs_review: false`
+entries may drive a "you qualify" decision; the 8 flagged entries may be *shown* (Path 2)
+but must carry a "confirm with the institution" line.
 
 ## 3. The data schema (`lib/subject_requirements.js`)
 

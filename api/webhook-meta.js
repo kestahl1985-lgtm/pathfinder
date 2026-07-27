@@ -135,6 +135,32 @@ function sendPiece(to, piece) {
       interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(["agree", "more"], piece.buttons) } },
     });
   }
+  // Generic reply-button menu (≤3 buttons) — used by the 3-way path choice
+  // and the Maths picker. piece.ids are the fixed reply ids, piece.buttons
+  // the localized titles in the same order.
+  if (piece.type === "menu") {
+    return graphPost({
+      ...base,
+      type: "interactive",
+      interactive: { type: "button", body: { text: piece.text }, action: { buttons: buttons(piece.ids, piece.buttons) } },
+    });
+  }
+  // Generic list picker — used by the interest-area chooser. piece.rows is an
+  // array of { id, title, description? }.
+  if (piece.type === "list") {
+    return graphPost({
+      ...base,
+      type: "interactive",
+      interactive: {
+        type: "list",
+        body: { text: piece.text },
+        action: {
+          button: piece.button,
+          sections: [{ rows: piece.rows.map((r) => (r.description ? { id: r.id, title: r.title, description: r.description } : { id: r.id, title: r.title })) }],
+        },
+      },
+    });
+  }
   if (piece.type === "media") {
     return graphPost({
       ...base,

@@ -49,8 +49,10 @@ function freshSession(phone) {
   return { phone, step: "language", data: {}, q: 0, responses: [], report_token: null };
 }
 
-// Drive a session through the full happy-path onboarding (English).
-const ONBOARDING_INPUTS = ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng"];
+// Drive a session through the full happy-path onboarding (English), ending by
+// choosing the assessment path at the v4 3-way menu so callers land in the
+// assessment step exactly as before v4.
+const ONBOARDING_INPUTS = ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng", "assessment"];
 async function runOnboarding(s) {
   let pieces;
   for (const input of ONBOARDING_INPUTS) pieces = await advance(s, input, input);
@@ -63,7 +65,7 @@ async function runOnboarding(s) {
   // ---- 1. Exact onboarding step sequence ----
   await check("onboarding follows the exact step sequence (no grade, no suburb)", async () => {
     const s = freshSession("t-seq");
-    const expectedSteps = ["consent", "name", "surname", "age", "province", "assessment"];
+    const expectedSteps = ["consent", "name", "surname", "age", "province", "path_choice", "assessment"];
     for (let i = 0; i < ONBOARDING_INPUTS.length; i++) {
       await advance(s, ONBOARDING_INPUTS[i], ONBOARDING_INPUTS[i]);
       assert.strictEqual(s.step, expectedSteps[i], `after input ${i + 1} expected step '${expectedSteps[i]}', got '${s.step}'`);
@@ -157,7 +159,7 @@ async function runOnboarding(s) {
       assert.strictEqual(s.report_token, null, "old report token survived the reset");
       assert.strictEqual(s.data.grade, undefined, "old grade data survived the reset");
       // ...and the reset session walks the NEW flow end-to-end
-      for (const input of ["agree", "Thabo", "Nkosi", "17", "Gauteng"]) await advance(s, input, input);
+      for (const input of ["agree", "Thabo", "Nkosi", "17", "Gauteng", "assessment"]) await advance(s, input, input);
       assert.strictEqual(s.step, "assessment", "reset session could not complete new onboarding");
     });
   }
@@ -268,7 +270,7 @@ async function runOnboarding(s) {
     assert.ok(text.length > 0, "career detail was empty");
   });
 
-  // ---- 11. RIASEC matching (hexagon-aware affinity over 88 careers) ----
+  // ---- 11. RIASEC matching (hexagon-aware affinity over 100 careers) ----
   await check("hexDist is the cyclic hexagon metric (0 same, 1 adj, 2 alt, 3 opp)", () => {
     assert.strictEqual(hexDist("R", "R"), 0);
     assert.strictEqual(hexDist("R", "I"), 1);   // adjacent
@@ -314,8 +316,8 @@ async function runOnboarding(s) {
       "IS career should beat I-only career for an I+S person");
   });
 
-  await check("every one of the 88 careers has a valid 1-3 letter Holland code", () => {
-    assert.strictEqual(CAREERS.length, 88, "expected 88 careers");
+  await check("every one of the 100 careers has a valid 1-3 letter Holland code", () => {
+    assert.strictEqual(CAREERS.length, 100, "expected 100 careers");
     for (const c of CAREERS) {
       assert.ok(Array.isArray(c.traits) && c.traits.length >= 1 && c.traits.length <= 3, `${c.name}: bad code length`);
       for (const t of c.traits) assert.ok("RIASEC".includes(t), `${c.name}: invalid trait ${t}`);
@@ -323,6 +325,17 @@ async function runOnboarding(s) {
     }
     const ids = CAREERS.map((c) => c.id);
     assert.strictEqual(ids.length, new Set(ids).size, "duplicate career ids");
+  });
+
+  await check("every career has a subject-requirement entry (careers.js ↔ subject_requirements.js in sync)", () => {
+    const { SUBJECT_REQUIREMENTS } = require("../lib/subject_requirements.js");
+    for (const c of CAREERS) {
+      assert.ok(SUBJECT_REQUIREMENTS[c.id], `${c.id}: no subject-requirement entry`);
+    }
+    const careerIds = new Set(CAREERS.map((c) => c.id));
+    for (const id of Object.keys(SUBJECT_REQUIREMENTS)) {
+      assert.ok(careerIds.has(id), `subject_requirements has orphan id ${id}`);
+    }
   });
 
   await check("computeMatches returns 6 real career ids ranked by affinity", async () => {
@@ -333,6 +346,99 @@ async function runOnboarding(s) {
     for (const id of s.data.matches) assert.ok(CAREERS.find((c) => c.id === id), `unknown id ${id}`);
     const top = CAREERS.find((c) => c.id === s.data.matches[0]);
     assert.ok(top.traits.includes("R"), "top match for a pure-R person should involve R");
+  });
+
+  // ---- 12. v4 study paths (3-way menu) ----
+  const study = require("../lib/study_paths.js");
+  const { SUBJECT_REQUIREMENTS } = require("../lib/subject_requirements.js");
+
+  // Onboard up to (but not through) the path menu — stop before "assessment".
+  async function onboardToMenu(phone) {
+    const s = freshSession(phone);
+    for (const input of ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng"]) await advance(s, input, input);
+    return s;
+  }
+
+  await check("after province the learner lands on the 3-way path menu", async () => {
+    const s = await onboardToMenu("t-menu");
+    assert.strictEqual(s.step, "path_choice", "did not reach path_choice after province");
+  });
+
+  await check("'I know what to study' → area → career shows real requirements", async () => {
+    const s = await onboardToMenu("t-know");
+    const cat = await advance(s, "know", "know");
+    assert.strictEqual(s.step, "study_category", "know did not enter study_category");
+    assert.ok(cat[0].rows && cat[0].rows.length === 6, "expected 6 interest-area rows");
+    await advance(s, "I", "I");
+    assert.strictEqual(s.step, "study_list", "picking an area did not enter study_list");
+    assert.ok((s.data.study_list || []).length > 0, "no careers listed for area I");
+    const detail = await advance(s, "1", "1");
+    const text = detail[0].text || "";
+    assert.ok(/Subjects you'll need|Open entry/.test(text), "requirement view missing subjects/entry");
+    assert.ok(/How to qualify/.test(text), "requirement view missing qualification pathway");
+    assert.ok(!/undefined|null/i.test(text), "requirement view leaked undefined/null");
+  });
+
+  await check("a flagged (needs_review) career carries the verify caveat", async () => {
+    const flaggedId = Object.keys(SUBJECT_REQUIREMENTS).find((id) => SUBJECT_REQUIREMENTS[id].needs_review);
+    const lang = "en";
+    const text = study.requirementText(lang, flaggedId);
+    assert.ok(/confirm these exact requirements/i.test(text), `flagged career ${flaggedId} missing verify caveat`);
+  });
+
+  await check("a confirmed career does NOT carry the verify caveat", async () => {
+    const confirmedId = Object.keys(SUBJECT_REQUIREMENTS).find((id) => !SUBJECT_REQUIREMENTS[id].needs_review);
+    const text = study.requirementText("en", confirmedId);
+    assert.ok(!/confirm these exact requirements/i.test(text), `confirmed career ${confirmedId} wrongly caveated`);
+  });
+
+  await check("'study by subject' filters careers by Maths, confirmed-only", async () => {
+    const s = await onboardToMenu("t-subj");
+    await advance(s, "subjects", "subjects");
+    assert.strictEqual(s.step, "subjects_maths", "subjects did not enter subjects_maths");
+    await advance(s, "none", "none");
+    assert.strictEqual(s.step, "study_list", "maths pick did not enter study_list");
+    const ids = s.data.study_list || [];
+    assert.ok(ids.length > 0, "no reachable careers for 'no maths'");
+    // 'none' must only surface careers with no maths gate, and never a flagged one.
+    for (const id of ids) {
+      assert.strictEqual(SUBJECT_REQUIREMENTS[id].maths, "no_maths_gate", `${id} should not be reachable with no maths`);
+      assert.strictEqual(SUBJECT_REQUIREMENTS[id].needs_review, false, `${id} flagged but surfaced as reachable`);
+    }
+  });
+
+  await check("reachability widens monotonically: none ⊆ lit ⊆ pure", async () => {
+    const none = study.reachableByMaths("none").length;
+    const lit = study.reachableByMaths("lit").length;
+    const pure = study.reachableByMaths("pure").length;
+    assert.ok(none <= lit && lit <= pure, `expected none(${none}) <= lit(${lit}) <= pure(${pure})`);
+    assert.strictEqual(pure, Object.values(SUBJECT_REQUIREMENTS).filter((r) => !r.needs_review).length, "pure should reach every confirmed career");
+  });
+
+  await check("the assessment path is still reachable from the menu", async () => {
+    const s = await onboardToMenu("t-quiz");
+    const out = await advance(s, "assessment", "assessment");
+    assert.strictEqual(s.step, "assessment", "assessment path not reachable from menu");
+    assert.ok((out[0].text || "").length > 0 && out[0].type === "yesno", "assessment did not start with question 1");
+  });
+
+  await check("WhatsApp list-row titles stay within the 24-char limit (all languages)", async () => {
+    for (const lang of ["en", "zu", "xh", "af"]) {
+      for (const row of study.categoryRows(lang)) {
+        assert.ok(row.title.length <= 24, `${lang} area title '${row.title}' exceeds 24 chars`);
+      }
+    }
+  });
+
+  await check("WhatsApp reply-button titles stay within the 20-char limit (all languages)", async () => {
+    const i18nMod = require("../lib/i18n.js");
+    for (const lang of ["en", "zu", "xh", "af"]) {
+      for (const key of ["pathButtons", "mathsButtons", "yesnoButtons", "consentButtons"]) {
+        for (const title of i18nMod.t(lang, key)) {
+          assert.ok(title.length <= 20, `${lang} ${key} title '${title}' exceeds 20 chars`);
+        }
+      }
+    }
   });
 
   if (process.exitCode === 1) {
