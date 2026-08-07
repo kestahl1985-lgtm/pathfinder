@@ -348,3 +348,10 @@ async function runOnboarding(s) {
     assert.ok(top.traits.includes("R"), "top match for a pure-R person should involve R");
   });
 
+
+  if (process.exitCode === 1) {
+    console.error("\nFLOW SEQUENCE TESTS FAILED — deploy will be blocked.");
+  } else {
+    console.log(`\nAll ${testCount} flow-sequence checks passed.`);
+  }
+})();
