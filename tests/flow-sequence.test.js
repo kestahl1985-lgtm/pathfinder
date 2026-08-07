@@ -52,7 +52,7 @@ function freshSession(phone) {
 // Drive a session through the full happy-path onboarding (English), ending by
 // choosing the assessment path at the v4 3-way menu so callers land in the
 // assessment step exactly as before v4.
-const ONBOARDING_INPUTS = ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng", "assessment"];
+const ONBOARDING_INPUTS = ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng"];
 async function runOnboarding(s) {
   let pieces;
   for (const input of ONBOARDING_INPUTS) pieces = await advance(s, input, input);
@@ -65,7 +65,7 @@ async function runOnboarding(s) {
   // ---- 1. Exact onboarding step sequence ----
   await check("onboarding follows the exact step sequence (no grade, no suburb)", async () => {
     const s = freshSession("t-seq");
-    const expectedSteps = ["consent", "name", "surname", "age", "province", "path_choice", "assessment"];
+    const expectedSteps = ["consent", "name", "surname", "age", "province", "assessment"];
     for (let i = 0; i < ONBOARDING_INPUTS.length; i++) {
       await advance(s, ONBOARDING_INPUTS[i], ONBOARDING_INPUTS[i]);
       assert.strictEqual(s.step, expectedSteps[i], `after input ${i + 1} expected step '${expectedSteps[i]}', got '${s.step}'`);
@@ -149,7 +149,7 @@ async function runOnboarding(s) {
   });
 
   // ---- 7. Stale sessions from removed flow steps reset gracefully ----
-  for (const staleStep of ["grade", "suburb", "school", "share_consent", "no_such_step"]) {
+  for (const staleStep of ["grade", "suburb", "school", "share_consent", "no_such_step", "study_category", "study_list", "subjects_maths"]) {
     await check(`stale session at removed step '${staleStep}' resets gracefully (no dead end)`, async () => {
       const s = { phone: "t-stale", step: staleStep, data: { lang: "en", name: "Old", grade: 11, suburb: "Somewhere" }, q: 17, responses: [1, 2, 0], report_token: "oldtoken" };
       const pieces = await advance(s, "10", "10");
@@ -348,102 +348,3 @@ async function runOnboarding(s) {
     assert.ok(top.traits.includes("R"), "top match for a pure-R person should involve R");
   });
 
-  // ---- 12. v4 study paths (3-way menu) ----
-  const study = require("../lib/study_paths.js");
-  const { SUBJECT_REQUIREMENTS } = require("../lib/subject_requirements.js");
-
-  // Onboard up to (but not through) the path menu — stop before "assessment".
-  async function onboardToMenu(phone) {
-    const s = freshSession(phone);
-    for (const input of ["1", "agree", "Thabo", "Nkosi", "17", "Gauteng"]) await advance(s, input, input);
-    return s;
-  }
-
-  await check("after province the learner lands on the 3-way path menu", async () => {
-    const s = await onboardToMenu("t-menu");
-    assert.strictEqual(s.step, "path_choice", "did not reach path_choice after province");
-  });
-
-  await check("'I know what to study' → area → career shows real requirements", async () => {
-    const s = await onboardToMenu("t-know");
-    const cat = await advance(s, "know", "know");
-    assert.strictEqual(s.step, "study_category", "know did not enter study_category");
-    assert.ok(cat[0].rows && cat[0].rows.length === 6, "expected 6 interest-area rows");
-    await advance(s, "I", "I");
-    assert.strictEqual(s.step, "study_list", "picking an area did not enter study_list");
-    assert.ok((s.data.study_list || []).length > 0, "no careers listed for area I");
-    const detail = await advance(s, "1", "1");
-    const text = detail[0].text || "";
-    assert.ok(/Subjects you'll need|Open entry/.test(text), "requirement view missing subjects/entry");
-    assert.ok(/How to qualify/.test(text), "requirement view missing qualification pathway");
-    assert.ok(!/undefined|null/i.test(text), "requirement view leaked undefined/null");
-  });
-
-  await check("a flagged (needs_review) career carries the verify caveat", async () => {
-    const flaggedId = Object.keys(SUBJECT_REQUIREMENTS).find((id) => SUBJECT_REQUIREMENTS[id].needs_review);
-    const lang = "en";
-    const text = study.requirementText(lang, flaggedId);
-    assert.ok(/confirm these exact requirements/i.test(text), `flagged career ${flaggedId} missing verify caveat`);
-  });
-
-  await check("a confirmed career does NOT carry the verify caveat", async () => {
-    const confirmedId = Object.keys(SUBJECT_REQUIREMENTS).find((id) => !SUBJECT_REQUIREMENTS[id].needs_review);
-    const text = study.requirementText("en", confirmedId);
-    assert.ok(!/confirm these exact requirements/i.test(text), `confirmed career ${confirmedId} wrongly caveated`);
-  });
-
-  await check("'study by subject' filters careers by Maths, confirmed-only", async () => {
-    const s = await onboardToMenu("t-subj");
-    await advance(s, "subjects", "subjects");
-    assert.strictEqual(s.step, "subjects_maths", "subjects did not enter subjects_maths");
-    await advance(s, "none", "none");
-    assert.strictEqual(s.step, "study_list", "maths pick did not enter study_list");
-    const ids = s.data.study_list || [];
-    assert.ok(ids.length > 0, "no reachable careers for 'no maths'");
-    // 'none' must only surface careers with no maths gate, and never a flagged one.
-    for (const id of ids) {
-      assert.strictEqual(SUBJECT_REQUIREMENTS[id].maths, "no_maths_gate", `${id} should not be reachable with no maths`);
-      assert.strictEqual(SUBJECT_REQUIREMENTS[id].needs_review, false, `${id} flagged but surfaced as reachable`);
-    }
-  });
-
-  await check("reachability widens monotonically: none ⊆ lit ⊆ pure", async () => {
-    const none = study.reachableByMaths("none").length;
-    const lit = study.reachableByMaths("lit").length;
-    const pure = study.reachableByMaths("pure").length;
-    assert.ok(none <= lit && lit <= pure, `expected none(${none}) <= lit(${lit}) <= pure(${pure})`);
-    assert.strictEqual(pure, Object.values(SUBJECT_REQUIREMENTS).filter((r) => !r.needs_review).length, "pure should reach every confirmed career");
-  });
-
-  await check("the assessment path is still reachable from the menu", async () => {
-    const s = await onboardToMenu("t-quiz");
-    const out = await advance(s, "assessment", "assessment");
-    assert.strictEqual(s.step, "assessment", "assessment path not reachable from menu");
-    assert.ok((out[0].text || "").length > 0 && out[0].type === "yesno", "assessment did not start with question 1");
-  });
-
-  await check("WhatsApp list-row titles stay within the 24-char limit (all languages)", async () => {
-    for (const lang of ["en", "zu", "xh", "af"]) {
-      for (const row of study.categoryRows(lang)) {
-        assert.ok(row.title.length <= 24, `${lang} area title '${row.title}' exceeds 24 chars`);
-      }
-    }
-  });
-
-  await check("WhatsApp reply-button titles stay within the 20-char limit (all languages)", async () => {
-    const i18nMod = require("../lib/i18n.js");
-    for (const lang of ["en", "zu", "xh", "af"]) {
-      for (const key of ["pathButtons", "mathsButtons", "yesnoButtons", "consentButtons"]) {
-        for (const title of i18nMod.t(lang, key)) {
-          assert.ok(title.length <= 20, `${lang} ${key} title '${title}' exceeds 20 chars`);
-        }
-      }
-    }
-  });
-
-  if (process.exitCode === 1) {
-    console.error("\nFLOW SEQUENCE TESTS FAILED — deploy will be blocked.");
-  } else {
-    console.log(`\nAll ${testCount} flow-sequence checks passed.`);
-  }
-})();
